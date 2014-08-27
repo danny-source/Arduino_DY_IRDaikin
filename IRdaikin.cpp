@@ -1,3 +1,44 @@
+/*
+ * IRdaikin
+ * Version 0.0.1 Aug, 2014
+ * Copyright 2014 danny
+ *
+ *IRremote library base from Ken Shirriff's IRremote library and add daikin IR function.
+ *IRdaikin is using custom IRremote library to simply to send daikin air conditioning ir command.
+ *
+ *0.Pinout:
+ * pin 3:UNO
+ * pin 2:Leonardo
+ * pin 9:Mega
+ *
+ *1.Setting:
+ *
+ *daikin_on();
+ *daikin_off();
+ *daikin_setSwing_on();
+ *daikin_setSwing_off();
+ *daikin_setMode(int mode);//0=FAN, 1=COOL, 2=DRY
+ *daikin_setFan(int speed);// 0~4=speed(1,2,3,4,5),5=auto,6=moon
+ *daikin_setTemp(int temp);//23 ~ 33 Celsius,if you using Fahrenheit ,maybe to enter Fahrenheit.
+ *daikin_sendCommand();
+ *
+ *2.Execute:
+ *daikin_sendCommand();
+ *
+ * You must initial setting by your programming and,
+ * After Setting execute daikin_sendCommand()
+ *
+ *Example:
+ *
+ *daikin_on();
+ *daikin_setSwing_off();
+ *daikin_setMode(1)
+ *daikin_setFan(4);//FAN speed to MAX
+ *daikin_setTemp(25);
+ *----everything is ok and to execute send command-----
+ *daikin_sendCommand();
+ */
+
 #include <IRdaikin.h>
 
 
@@ -18,22 +59,22 @@ static byte vModeTable[] = { 6,3,2};
 //
 // void IRdaikin()
 // {
-// 	airController_off();
-// 	airController_setMode(0);
-// 	airController_setTemp(26);
-// 	airController_setFan(5);
+// 	daikinController_off();
+// 	daikinController_setMode(0);
+// 	daikinController_setTemp(26);
+// 	daikinController_setFan(5);
 // 	daikin_setSwing_off();
 // }
 IRsend irsend;
 
 void IRdaikin::daikin_on()
 {
-	airController_on();
+	daikinController_on();
 }  
 
 void IRdaikin::daikin_off()
 {
-	airController_off();
+	daikinController_off();
 }
 
 void IRdaikin::daikin_setSwing_on()
@@ -50,7 +91,7 @@ void IRdaikin::daikin_setMode(int mode)
 {
 	if (mode>=0 && mode <=2)
 	{
-		airController_setMode(vModeTable[mode]);
+		daikinController_setMode(vModeTable[mode]);
 	}
 }
 
@@ -59,7 +100,7 @@ void IRdaikin::daikin_setFan(int speed)
 {
 	if (speed>=0 && speed <=6)
 	{
-		airController_setMode(vFanTable[speed]);
+		daikinController_setMode(vFanTable[speed]);
 	}
 }
 
@@ -68,7 +109,7 @@ void IRdaikin::daikin_setTemp(int temp)
 	if (temp >= 23 && temp>=33)
 	{
 		daikin[14] = (temp)*2;
-		airController_checksum();
+		daikinController_checksum();
 	}
 }
 
@@ -77,7 +118,7 @@ void IRdaikin::daikin_sendCommand()
 		sendDaikinCommand();
 }
 //
-uint8_t IRdaikin::airController_checksum()
+uint8_t IRdaikin::daikinController_checksum()
 {
 	uint8_t sum = 0;
 	uint8_t i;
@@ -102,50 +143,45 @@ uint8_t IRdaikin::airController_checksum()
 
 //private function
 
-void IRdaikin::airController_on(){
-	//state = ON;
+void IRdaikin::daikinController_on()
+{
 	daikin[13] |= 0x01;
-	airController_checksum();
+	daikinController_checksum();
 }
 
-void IRdaikin::airController_off(){
-	//state = OFF;
+void IRdaikin::daikinController_off()
+{
 	daikin[13] &= 0xFE;
-	airController_checksum();
+	daikinController_checksum();
 }
 
-void IRdaikin::airController_setAux(uint8_t aux){
-	daikin[21] = aux;
-	airController_checksum();
-}
-
-void IRdaikin::airController_setTemp(uint8_t temp)
+void IRdaikin::daikinController_setTemp(uint8_t temp)
 {
 	daikin[14] = (temp)*2;
-	airController_checksum();
+	daikinController_checksum();
 }
 
 
-void IRdaikin::airController_setFan(uint8_t fan)
+void IRdaikin::daikinController_setFan(uint8_t fan)
 {
 	daikin[16] = fan;
-	airController_checksum();
+	daikinController_checksum();
 }
 
-uint8_t IRdaikin::airConroller_getState()
+uint8_t IRdaikin::daikinController_getState()
 {
 	return (daikin[13])&0x01;
 }
 
-void IRdaikin::airController_setMode(uint8_t mode)
+void IRdaikin::daikinController_setMode(uint8_t mode)
 {
-	daikin[13]=mode<<4 | airConroller_getState();
-	airController_checksum();
+	daikin[13]=mode<<4 | daikinController_getState();
+	daikinController_checksum();
 }
 
 void IRdaikin::sendDaikinCommand()
 {
-      airController_checksum();  
+      daikinController_checksum();  
       irsend.sendDaikin(daikin, 8,0); 
       delay(29);
       irsend.sendDaikin(daikin, 19,8); 
