@@ -12,6 +12,8 @@
  IRremote library base from Ken Shirriff's IRremote library and add daikin IR function.
  IRdaikin is using custom IRremote library to simply to send daikin air conditioning ir command.
 
+ ![](https://raw.githubusercontent.com/danny-source/Arduino_IRremote_Daikin/master/Arduino_UNO_IR_Transmit.png)
+
 ## Pinout:
 
   - pin 3:UNO
