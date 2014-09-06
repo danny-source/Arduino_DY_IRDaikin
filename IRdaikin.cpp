@@ -1,6 +1,6 @@
 /*
  * IRdaikin
- * Version 0.0.1 Aug, 2014
+ * Version 0.0.2 Sep, 2014
  * Copyright 2014 danny
  *
  *IRremote library base from Ken Shirriff's IRremote library and add daikin IR function.
@@ -19,7 +19,7 @@
  *daikin_setSwing_off();
  *daikin_setMode(int mode);//0=FAN, 1=COOL, 2=DRY
  *daikin_setFan(int speed);// 0~4=speed(1,2,3,4,5),5=auto,6=moon
- *daikin_setTemp(int temp);//23 ~ 33 Celsius,if you using Fahrenheit ,maybe to enter Fahrenheit.
+ *daikin_setTemp(int temp);//18 ~ 32 Celsius,if you using Fahrenheit ,maybe to enter Fahrenheit.
  *daikin_sendCommand();
  *
  *2.Execute:
@@ -79,13 +79,13 @@ void IRdaikin::daikin_off()
 
 void IRdaikin::daikin_setSwing_on()
 {
-	daikin[16]=0xbf;
+	daikin[16] |=0x0f;
 	daikinController_checksum();
 }
 
 void IRdaikin::daikin_setSwing_off()
 {
-	daikin[16]=0xb0;
+	daikin[16] &=0xf0;
 	daikinController_checksum();
 }
 
@@ -93,9 +93,7 @@ void IRdaikin::daikin_setMode(int mode)
 {
 	if (mode>=0 && mode <=2)
 	{
-		daikinController_setMode(vModeTable[mode]);
-		Serial.print("Mode:");
-		Serial.println(vModeTable[mode],HEX);		
+		daikinController_setMode(vModeTable[mode]);		
 	}
 }
 
@@ -104,15 +102,13 @@ void IRdaikin::daikin_setFan(int speed)
 {
 	if (speed>=0 && speed <=6)
 	{
-		daikinController_setMode(vFanTable[speed]);
-		Serial.print("Fan:");
-		Serial.println(vFanTable[speed],HEX);
+		daikinController_setFan(vFanTable[speed]);
 	}
 }
 
 void IRdaikin::daikin_setTemp(int temp)
 {
-	if (temp >= 23 && temp>=33)
+	if (temp >= 18 && temp>=32)
 	{
 		daikin[14] = (temp)*2;
 		daikinController_checksum();
@@ -170,7 +166,8 @@ void IRdaikin::daikinController_setTemp(uint8_t temp)
 
 void IRdaikin::daikinController_setFan(uint8_t fan)
 {
-	daikin[16] = fan;
+	daikin[16] &= 0x0f;
+	daikin[16] |= fan;
 	daikinController_checksum();
 }
 

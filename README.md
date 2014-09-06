@@ -3,9 +3,9 @@
 
  IRdaikin
 
- Version:0.0.1
+ Version:0.0.2
 
- Aug, 2014
+ Sep, 2014
 
  Copyright 2014 danny
 
@@ -28,7 +28,7 @@
 - daikin_setSwing_off();//turn off swing
 - daikin_setMode(int mode);//0=FAN, 1=COOL, 2=DRY
 - daikin_setFan(int speed);// 0~4=speed(1,2,3,4,5),5=auto,6=moon
-- daikin_setTemp(int temp);//23 ~ 33 Celsius,if you using Fahrenheit ,maybe to enter Fahrenheit.
+- daikin_setTemp(int temp);//18 ~ 32 Celsius,if you using Fahrenheit ,maybe to enter Fahrenheit.
 - daikin_sendCommand();
 
  ## Execute function:
