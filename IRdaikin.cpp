@@ -55,7 +55,7 @@ unsigned char daikin[COMMAND_LENGTH]     = {
 
 static byte vFanTable[] = { 0x30,0x40,0x50,0x60,0x70,0xa0,0xb0};
 //0 FAN 1 COOL 2 DRY
-static byte vModeTable[] = { 6,3,2};
+static byte vModeTable[] = { 0x6,0x3,0x2};
 //
 // void IRdaikin()
 // {
@@ -80,11 +80,13 @@ void IRdaikin::daikin_off()
 void IRdaikin::daikin_setSwing_on()
 {
 	daikin[16]=0xbf;
+	daikinController_checksum();
 }
 
 void IRdaikin::daikin_setSwing_off()
 {
 	daikin[16]=0xb0;
+	daikinController_checksum();
 }
 
 void IRdaikin::daikin_setMode(int mode)
@@ -92,6 +94,8 @@ void IRdaikin::daikin_setMode(int mode)
 	if (mode>=0 && mode <=2)
 	{
 		daikinController_setMode(vModeTable[mode]);
+		Serial.print("Mode:");
+		Serial.println(vModeTable[mode],HEX);		
 	}
 }
 
@@ -101,6 +105,8 @@ void IRdaikin::daikin_setFan(int speed)
 	if (speed>=0 && speed <=6)
 	{
 		daikinController_setMode(vFanTable[speed]);
+		Serial.print("Fan:");
+		Serial.println(vFanTable[speed],HEX);
 	}
 }
 
