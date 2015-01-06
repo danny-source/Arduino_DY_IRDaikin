@@ -108,7 +108,7 @@ void IRdaikin::daikin_setFan(int speed)
 
 void IRdaikin::daikin_setTemp(int temp)
 {
-	if (temp >= 18 && temp>=32)
+	if (temp >= 18 && temp<=32)
 	{
 		daikin[14] = (temp)*2;
 		daikinController_checksum();
