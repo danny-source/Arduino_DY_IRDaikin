@@ -24,7 +24,7 @@
 #include <avr/interrupt.h>
 
 volatile irparams_t irparams;
-
+int IRpin;
 // These versions of MATCH, MATCH_MARK, and MATCH_SPACE are only for debugging.
 // To use them, set DEBUG in IRremoteInt.h
 // Normally macros are used for efficiency
@@ -276,6 +276,28 @@ void IRsend::sendSAMSUNG(unsigned long data, int nbits)
   space(0);
 }
 
+void IRsend::setPin(int pin) {
+  IRpin = pin;
+}
+
+#if defined(SIMULATE)
+
+void IRsend::mark(int time) {
+  int cycleTime = time/25;
+  for (int i = 0; i < cycleTime; ++i)
+  {
+    digitalWrite(IRpin,HIGH);
+    delayMicroseconds(10);
+    digitalWrite(IRpin,LOW);
+    delayMicroseconds(3);
+  }
+}
+
+void IRsend::space(int time) {
+  digitalWrite(IRpin,LOW);
+  delayMicroseconds(time);  
+}
+#else
 void IRsend::mark(int time) {
   // Sends an IR mark for the specified number of microseconds.
   // The mark output is modulated at the PWM frequency.
@@ -290,6 +312,9 @@ void IRsend::space(int time) {
   TIMER_DISABLE_PWM; // Disable pin 3 PWM output
   delayMicroseconds(time);
 }
+
+#endif
+
 
 void IRsend::enableIROut(int khz) {
   // Enables IR output.  The khz value controls the modulation frequency in kilohertz.
@@ -309,13 +334,15 @@ void IRsend::enableIROut(int khz) {
   
   pinMode(TIMER_PWM_PIN, OUTPUT);
   digitalWrite(TIMER_PWM_PIN, LOW); // When not sending PWM, we want it low
-  
+ //
+
+
   // COM2A = 00: disconnect OC2A
   // COM2B = 00: disconnect OC2B; to send signal set to 10: OC2B non-inverted
   // WGM2 = 101: phase-correct PWM with OCRA as top
   // CS2 = 000: no prescaling
   // The top value for the timer.  The modulation frequency will be SYSCLOCK / 2 / OCR2A.
-  TIMER_CONFIG_KHZ(khz);
+
 }
 
 IRrecv::IRrecv(int recvpin)

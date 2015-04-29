@@ -277,7 +277,6 @@ extern volatile irparams_t irparams;
 #define TIMER_PWM_PIN        3  /* Arduino Duemilanove, Diecimila, LilyPad, etc */
 #endif
 
-
 // defines for timer1 (16 bits)
 #elif defined(IR_USE_TIMER1)
 #define TIMER_RESET

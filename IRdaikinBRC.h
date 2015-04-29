@@ -1,10 +1,10 @@
 /*
  * IRdaikin
- * Version 0.0.1 Aug, 2014
- * Copyright 2014 danny
+ * Version 0.0.1 Apri, 2015
+ * Copyright 2015 danny
  *
  *IRremote library base from Ken Shirriff's IRremote library and add daikin IR function.
- *IRdaikin is using custom IRremote library to simply to send daikin air conditioning ir command.
+ *IRdaikinBRC is using custom IRremote library to simply to send daikin air conditioning BRC remote control ir command.
  *
  *0.Pinout:
  * pin 3:UNO
@@ -17,9 +17,8 @@
  *daikin_off();
  *daikin_setSwing_on();
  *daikin_setSwing_off();
- *daikin_setMode(int mode);//0=FAN, 1=COOL, 2=DRY
- *daikin_setFan(int speed);// 0~4=speed(1,2,3,4,5),5=auto,6=moon
- *daikin_setTemp(int temp);//23 ~ 33 Celsius,if you using Fahrenheit ,maybe to enter Fahrenheit.
+ *daikin_setFan(int speed);// 0-Low,1-High
+ *daikin_setTemp(int temp);//18 ~ 36 Celsius,if you using Fahrenheit ,maybe to enter Fahrenheit.
  *daikin_sendCommand();
  *
  *2.Execute:
@@ -32,8 +31,7 @@
  *
  *daikin_on();
  *daikin_setSwing_off();
- *daikin_setMode(1)
- *daikin_setFan(4);//FAN speed to MAX
+ *daikin_setFan(0);//FAN speed to Low
  *daikin_setTemp(25);
  *----everything is ok and to execute send command-----
  *daikin_sendCommand();
@@ -51,11 +49,12 @@ public:
   void daikin_off();
   void daikin_setSwing_on();
   void daikin_setSwing_off();
-  void daikin_setMode(int mode);//0 FAN, 1 COOL, 2 DRY
+  void daikin_setMode(int mode);//
   void daikin_setFan(int speed);// 0~1 Hi,Low
   void daikin_setTemp(uint8_t temp);//22 ~ 33
   void daikin_sendCommand();
   void dump();
+  void setPin(int pin);
 
 private:
 void daikinController_on();

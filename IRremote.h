@@ -80,8 +80,7 @@ private:
   long decodeHash(decode_results *results);
   int compare(unsigned int oldval, unsigned int newval);
 
-} 
-;
+} ;
 
 // Only used for testing; can remove virtual for shorter code
 #ifdef TEST
@@ -110,10 +109,11 @@ public:
   // private:
   void sendSAMSUNG(unsigned long data, int nbits);
   void enableIROut(int khz);
+  void setPin(int pin);
+private:
   VIRTUAL void mark(int usec);
   VIRTUAL void space(int usec);
-}
-;
+};
 
 // Some useful constants
 
@@ -123,5 +123,5 @@ public:
 // Marks tend to be 100us too long, and spaces 100us too short
 // when received due to sensor lag.
 #define MARK_EXCESS 100
-
+//#define SIMULATE
 #endif
