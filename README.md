@@ -1,16 +1,15 @@
 
-## IRdaikin
+## IRdaikin ARC/BRC
 
- IRdaikin
+ IRdaikin ARC/BRC
 
- Version:0.0.3
 
- Sep, 2014
+ Start:Sep, 2014
 
- Copyright 2014 danny
+ Copyright 2015 danny
 
- IRremote library base from Ken Shirriff's IRremote library and add daikin IR function.
- IRdaikin is using custom IRremote library to simply to send daikin air conditioning ir command.
+ IRdaikin ARC/BRC library base from Ken Shirriff's IRremote library.
+ IRdaikin ARC/BRC is using custom IRremote library to simply to send daikin air conditioning ARC/BRC remote control's ir command.
 
  ![](https://raw.githubusercontent.com/danny-source/Arduino_IRremote_Daikin/master/Arduino_UNO_IR_Transmit.png)
 
@@ -20,7 +19,7 @@
   - pin 2:Leonardo
   - pin 9:Mega
 
-## Setting function:
+## Setting function Daikin ARC:
 
 - daikin_on();//turn on
 - daikin_off();//turn off
@@ -31,6 +30,16 @@
 - daikin_setTemp(int temp);//18 ~ 32 Celsius,if you using Fahrenheit ,maybe to enter Fahrenheit.
 - daikin_sendCommand();
 
+## Setting function Daikin BRC:
+
+- daikin_on();//turn on
+- daikin_off();//turn off
+- daikin_setSwing_on();//turn on swing
+- daikin_setSwing_off();//turn off swing
+- daikin_setFan(int speed);// 0.Low 1.High
+- daikin_setTemp(int temp);//18 ~ 36 Celsius,if you using Fahrenheit ,maybe to enter Fahrenheit.
+- daikin_sendCommand();
+
  ## Execute function:
 
 - daikin_sendCommand();
@@ -38,7 +47,7 @@
   You must initial setting by your programming and,
   After Setting execute daikin_sendCommand()
 
-## Example:
+## Example Daikin ARC:
 
 ```
  daikin_on();
@@ -49,3 +58,7 @@
  //----everything is ok and to execute send command-----
  daikin_sendCommand();
 ```
+
+## Thanks
+
+`Kwok Fai Fong` help me build Daikin BRC remote control support.
