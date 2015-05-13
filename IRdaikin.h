@@ -55,6 +55,8 @@ public:
   void daikin_setFan(int speed);// 0~4 speed,5 auto,6 moon
   void daikin_setTemp(int temp);//23 ~ 33
   void daikin_sendCommand();
+  void dump();
+  void setPin(int pin);
 
 private:
 void daikinController_on();

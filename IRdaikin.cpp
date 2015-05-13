@@ -102,7 +102,14 @@ uint8_t IRdaikin::daikinController_checksum()
 
         
 }
-
+void IRdaikin::dump()
+{
+	uint8_t i;
+	for (i=0; i <COMMAND_LENGTH; i++) {
+		Serial.print(daikin[i],HEX);
+		Serial.print("-");
+	}
+}
 
 //private function
 
@@ -149,4 +156,8 @@ void IRdaikin::sendDaikinCommand()
       irsend.sendDaikin(daikin, 8,0); 
       delay(29);
       irsend.sendDaikin(daikin, 19,8); 
+}
+void IRdaikin::setPin(int pin)
+{
+	irsend.setPin(pin);
 }

@@ -123,5 +123,5 @@ private:
 // Marks tend to be 100us too long, and spaces 100us too short
 // when received due to sensor lag.
 #define MARK_EXCESS 100
-//#define SIMULATE
+#define SIMULATE
 #endif

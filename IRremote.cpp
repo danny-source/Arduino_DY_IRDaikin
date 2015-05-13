@@ -277,6 +277,8 @@ void IRsend::sendSAMSUNG(unsigned long data, int nbits)
 }
 
 void IRsend::setPin(int pin) {
+  pinMode(IRpin, OUTPUT);
+  digitalWrite(IRpin, LOW); // When not sending PWM, we want it low  
   IRpin = pin;
 }
 
@@ -287,9 +289,9 @@ void IRsend::mark(int time) {
   for (int i = 0; i < cycleTime; ++i)
   {
     digitalWrite(IRpin,HIGH);
-    delayMicroseconds(10);
+    delayMicroseconds(11);
     digitalWrite(IRpin,LOW);
-    delayMicroseconds(3);
+    delayMicroseconds(5);
   }
 }
 
