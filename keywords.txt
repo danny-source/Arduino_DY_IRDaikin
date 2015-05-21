@@ -1,0 +1,29 @@
+#######################################
+# Syntax Coloring Map For IRDaikin ARC/BRC
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+IRdaikin KEYWORD1 IRdaikin
+IRdaikinBRC KEYWORD1 IRdaikinBRC
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+daikin_on KEYWORD2
+daikin_off KEYWORD2
+daikin_setSwing_on KEYWORD2
+daikin_setSwing_off KEYWORD2
+daikin_setMode KEYWORD2
+daikin_setFan KEYWORD2
+daikin_setTemp KEYWORD2
+daikin_sendCommand KEYWORD2
+dump KEYWORD2
+setPin KEYWORD2
+#######################################
+# Instances (KEYWORD2)
+#######################################
+
+#######################################
+# Constants (LITERAL1)
+#######################################
