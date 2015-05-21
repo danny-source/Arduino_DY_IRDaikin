@@ -344,7 +344,7 @@ void IRsend::enableIROut(int khz) {
   // WGM2 = 101: phase-correct PWM with OCRA as top
   // CS2 = 000: no prescaling
   // The top value for the timer.  The modulation frequency will be SYSCLOCK / 2 / OCR2A.
-
+  TIMER_CONFIG_KHZ(khz);
 }
 
 IRrecv::IRrecv(int recvpin)
