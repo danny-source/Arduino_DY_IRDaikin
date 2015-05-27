@@ -6,6 +6,10 @@
 // # of bytes per command
 const int COMMAND_LENGTH = 27;    
 
+unsigned char daikinHeader[8] = {
+	0x11,0xDA,0x27,0x00,0xC5,0x00,0x00,0xD7
+};
+
 unsigned char daikin[COMMAND_LENGTH]     = { 
 0x11,0xDA,0x27,0xF0,0x00,0x00,0x00,0x20,
 //0    1    2   3    4    5     6   7
@@ -152,6 +156,10 @@ void IRdaikin::daikinController_setMode(uint8_t mode)
 
 void IRdaikin::sendDaikinCommand()
 {
+	  irsend.sendDaikinWake();
+      delay(20);
+      irsend.sendDaikin(daikinHeader, 9,0); 
+      delay(29);
       daikinController_checksum();  
       irsend.sendDaikin(daikin, 8,0); 
       delay(29);

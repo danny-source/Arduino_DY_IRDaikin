@@ -106,6 +106,7 @@ public:
   void sendPanasonic(unsigned int address, unsigned long data);
   void sendJVC(unsigned long data, int nbits, int repeat); // *Note instead of sending the REPEAT constant if you want the JVC repeat signal sent, send the original code value and change the repeat argument from 0 to 1. JVC protocol repeats by skipping the header NOT by sending a separate code value like NEC does.
   void sendDaikin(unsigned char buf[], int len,int start);
+  void sendDaikinWake();
   // private:
   void sendSAMSUNG(unsigned long data, int nbits);
   void enableIROut(int khz);

@@ -100,6 +100,26 @@ space(DAIKIN_HDR_SPACE);
 	  space(DAIKIN_ZERO_SPACE);
   }
 
+void IRsend::sendDaikinWake() {
+  enableIROut(38);
+  space(DAIKIN_ZERO_MARK);
+  //
+  mark(DAIKIN_ZERO_MARK);
+  space(DAIKIN_ZERO_MARK);
+  //
+  mark(DAIKIN_ZERO_MARK);
+  space(DAIKIN_ZERO_MARK);
+  //
+  mark(DAIKIN_ZERO_MARK);
+  space(DAIKIN_ZERO_MARK);
+  //
+  mark(DAIKIN_ZERO_MARK);
+  space(DAIKIN_ZERO_MARK);
+  //
+  mark(DAIKIN_ZERO_MARK);
+  space(DAIKIN_ZERO_MARK);
+}
+
 
 void IRsend::sendNEC(unsigned long data, int nbits)
 {
