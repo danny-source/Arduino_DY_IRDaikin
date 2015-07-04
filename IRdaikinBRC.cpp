@@ -29,7 +29,7 @@ static byte vTempTableBRC[] = {26,28,30,32,34,36,38,40,
 // 	daikinController_setFan(5);
 // 	daikin_setSwing_off();
 // }
-IRsend irsend1;
+IRDaikinSend irsend1;
 
 void IRdaikinBRC::daikin_on()
 {

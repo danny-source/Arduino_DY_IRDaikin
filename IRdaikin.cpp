@@ -30,7 +30,7 @@ static byte vModeTable[] = { 0x6,0x3,0x2};
 // 	daikinController_setFan(5);
 // 	daikin_setSwing_off();
 // }
-IRsend irsend;
+IRDaikinSend irsend;
 
 void IRdaikin::daikin_on()
 {

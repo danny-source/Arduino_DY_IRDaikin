@@ -40,8 +40,8 @@
  */
 #ifndef IRdaikin_h
 #define IRdaikin_h
-#include <IRremote.h>
-#include <IRremoteInt.h>
+#include <IRremoteDaikin.h>
+#include <IRremoteIntDaikin.h>
 
 class IRdaikin
 {
