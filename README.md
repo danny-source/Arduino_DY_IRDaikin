@@ -8,10 +8,15 @@
 
  Copyright 2015 danny
 
- IRdaikin ARC/BRC library base from Ken Shirriff's IRremote library.
- IRdaikin ARC/BRC is using custom IRremote library to simply to send daikin air conditioning ARC/BRC remote control's ir command.
+ IRdaikin ARC/BRC library base from Ken Shirriff's IRremote library and IRremote rename IRremoteDaikin.
+ 
+ IRdaikin ARC/BRC is simply to send ir command to control daikin air conditioning ARC/BRC.
 
  ![](https://raw.githubusercontent.com/danny-source/Arduino_IRremote_Daikin/master/Arduino_UNO_IR_Transmit.png)
+ 
+## Changelog:
+
+0.0.5  In order to isolate,IRremote renamed IRremoteDaikin and refactory, 
 
 ## Pinout:
 
