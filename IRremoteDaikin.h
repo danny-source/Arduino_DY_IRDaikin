@@ -1,28 +1,16 @@
 /*
- * IRremote
- * Version 0.1 July, 2009
- * Copyright 2009 Ken Shirriff
- * For details, see http://arcfn.com/2009/08/multi-protocol-infrared-remote-library.htm http://arcfn.com
- * Edited by Mitra to add new controller SANYO
- *
- * Interrupt code based on NECIRrcv by Joe Knapp
- * http://www.arduino.cc/cgi-bin/yabb2/YaBB.pl?num=1210243556
- * Also influenced by http://zovirl.com/2008/11/12/building-a-universal-remote-with-an-arduino/
- *
- * JVC and Panasonic protocol added by Kristian Lauszus (Thanks to zenwheel and other people at the original blog post)
-* LG added by Darryl Smith (based on the JVC protocol)
+ * Arduino IRremote Daikin 2015
+ * Copyright 2015 danny
+ * 
+ * 
+ * enableIROut declare base on  Ken Shirriff's IRremote library.
+ * http://arcfn.com/2009/08/multi-protocol-infrared-remote-library.html
+ * 
+ * 
  */
 
 #ifndef IRremoteDaikin_h
 #define IRremoteDaikin_h
-
-// The following are compile-time library options.
-// If you change them, recompile the library.
-// If DEBUG is defined, a lot of debugging output will be printed during decoding.
-// TEST must be defined for the IRtest unittests to work.  It will make some
-// methods virtual, which will be slightly slower, which is why it is optional.
-// #define DEBUG
-// #define TEST
 
 // Only used for testing; can remove virtual for shorter code
 #define VIRTUAL

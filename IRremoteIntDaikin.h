@@ -1,16 +1,12 @@
 /*
- * IRremote
- * Version 0.1 July, 2009
- * Copyright 2009 Ken Shirriff
- * For details, see http://arcfn.com/2009/08/multi-protocol-infrared-remote-library.html
- *
- * Modified by Paul Stoffregen <paul@pjrc.com> to support other boards and timers
- *
- * Interrupt code based on NECIRrcv by Joe Knapp
- * http://www.arduino.cc/cgi-bin/yabb2/YaBB.pl?num=1210243556
- * Also influenced by http://zovirl.com/2008/11/12/building-a-universal-remote-with-an-arduino/
- *
- * JVC and Panasonic protocol added by Kristian Lauszus (Thanks to zenwheel and other people at the original blog post)
+ * Arduino IRremote Daikin 2015
+ * Copyright 2015 danny
+ * 
+ * 
+ * Arduino PWM declare base on  Ken Shirriff's IRremote library.
+ * http://arcfn.com/2009/08/multi-protocol-infrared-remote-library.html
+ * 
+ * 
  */
 
 #ifndef IRremoteintDaikin_h
@@ -91,7 +87,7 @@
 //DAIKIN
 #define DAIKIN_HDR_MARK	    3600 //DAIKIN_ZERO_MARK*8
 #define DAIKIN_HDR_SPACE	1600 //DAIKIN_ZERO_MARK*4
-#define DAIKIN_ONE_SPACE	1300 
+#define DAIKIN_ONE_SPACE	1300
 #define DAIKIN_ONE_MARK	    380
 #define DAIKIN_ZERO_MARK	380
 #define DAIKIN_ZERO_SPACE   380

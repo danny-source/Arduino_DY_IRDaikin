@@ -1,20 +1,12 @@
 /*
- * IRremote
- * Version 0.11 August, 2009
- * Copyright 2009 Ken Shirriff
- * For details, see http://arcfn.com/2009/08/multi-protocol-infrared-remote-library.html
- *
- * Modified by Paul Stoffregen <paul@pjrc.com> to support other boards and timers
- * Modified  by Mitra Ardron <mitra@mitra.biz> 
- * Added Sanyo and Mitsubishi controllers
- * Modified Sony to spot the repeat codes that some Sony's send
- *
- * Interrupt code based on NECIRrcv by Joe Knapp
- * http://www.arduino.cc/cgi-bin/yabb2/YaBB.pl?num=1210243556
- * Also influenced by http://zovirl.com/2008/11/12/building-a-universal-remote-with-an-arduino/
- *
- * JVC and Panasonic protocol added by Kristian Lauszus (Thanks to zenwheel and other people at the original blog post)
- * LG added by Darryl Smith (based on the JVC protocol)
+ * Arduino IRremote Daikin 2015
+ * Copyright 2015 danny
+ * 
+ * 
+ * enableIROut declare base on  Ken Shirriff's IRremote library.
+ * http://arcfn.com/2009/08/multi-protocol-infrared-remote-library.html
+ * 
+ * 
  */
 
 #include "IRremoteDaikin.h"
@@ -28,7 +20,6 @@ int IRpin;
 void IRDaikinSend::sendDaikin(unsigned char buf[], int len, int start) {
 int data2;
   enableIROut(38);
-   
 mark(DAIKIN_HDR_MARK);
 space(DAIKIN_HDR_SPACE);
      
@@ -92,24 +83,24 @@ void IRDaikinSend::setPin(int pin) {
   IRpin = pin;
 }
 
-#if defined(SIMULATE)
+//~ #if defined(SIMULATE)
 
-void IRDaikinSend::mark(int time) {
-  int cycleTime = time/25;
-  for (int i = 0; i < cycleTime; ++i)
-  {
-    digitalWrite(IRpin,HIGH);
-    delayMicroseconds(11);
-    digitalWrite(IRpin,LOW);
-    delayMicroseconds(5);
-  }
-}
+//~ void IRDaikinSend::mark(int time) {
+  //~ int cycleTime = time/25;
+  //~ for (int i = 0; i < cycleTime; ++i)
+  //~ {
+    //~ digitalWrite(IRpin,HIGH);
+    //~ delayMicroseconds(11);
+    //~ digitalWrite(IRpin,LOW);
+    //~ delayMicroseconds(5);
+  //~ }
+//~ }
 
-void IRDaikinSend::space(int time) {
-  digitalWrite(IRpin,LOW);
-  delayMicroseconds(time);  
-}
-#else
+//~ void IRDaikinSend::space(int time) {
+  //~ digitalWrite(IRpin,LOW);
+  //~ delayMicroseconds(time);
+//~ }
+//~ #else
 void IRDaikinSend::mark(int time) {
   // Sends an IR mark for the specified number of microseconds.
   // The mark output is modulated at the PWM frequency.
@@ -125,7 +116,7 @@ void IRDaikinSend::space(int time) {
   delayMicroseconds(time);
 }
 
-#endif
+//~ #endif
 
 
 void IRDaikinSend::enableIROut(int khz) {
@@ -142,10 +133,10 @@ void IRDaikinSend::enableIROut(int khz) {
 
   
   // Disable the Timer2 Interrupt (which is used for receiving IR)
-  TIMER_DISABLE_INTR; //Timer2 Overflow Interrupt
+  //TIMER_DISABLE_INTR; //Timer2 Overflow Interrupt
   
   pinMode(TIMER_PWM_PIN, OUTPUT);
-  digitalWrite(TIMER_PWM_PIN, LOW); // When not sending PWM, we want it low
+  //digitalWrite(TIMER_PWM_PIN, HIGH); // When not sending PWM, we want it low
  //
 
 

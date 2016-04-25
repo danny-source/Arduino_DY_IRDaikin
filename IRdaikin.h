@@ -46,17 +46,27 @@
 class IRdaikin
 {
 public:
-  //void IRdaikin();		
-  void daikin_on();
-  void daikin_off();
-  void daikin_setSwing_on();
-  void daikin_setSwing_off();
-  void daikin_setMode(int mode);//0 FAN, 1 COOL, 2 DRY
-  void daikin_setFan(int speed);// 0~4 speed,5 auto,6 moon
-  void daikin_setTemp(int temp);//23 ~ 33
-  void daikin_sendCommand();
-  void dump();
-  void setPin(int pin);
+  //void IRdaikin();
+	void daikin_on();
+	void daikin_off();
+	void daikin_setPower(uint8_t state);
+	void daikin_setSwing_on();
+	void daikin_setSwing_off();
+	void daikin_setSwing(uint8_t state);
+	void daikin_setMode(uint8_t mode);//0 FAN, 1 COOL, 2 DRY
+	void daikin_setFan(uint8_t speed);// 0~4 speed,5 auto,6 moon
+	void daikin_setTemp(uint8_t temp);//23 ~ 33
+	void daikin_sendCommand();
+	void dump();
+	void description();
+	//
+	uint8_t daikin_getPower();
+	uint8_t daikin_getSwingState();
+	uint8_t daikin_getMode();
+	uint8_t daikin_getFan();
+	uint8_t daikin_getTemp();
+	void setPin(int pin);
+	uint8_t decode();
 
 private:
 void daikinController_on();
@@ -67,6 +77,18 @@ void daikinController_setMode(uint8_t mode);
 void sendDaikinCommand();
 uint8_t daikinController_checksum();
 uint8_t daikinController_getState();
+//
+void receivedIRUpdateToSendBuffer(uint8_t *recvData);
+uint8_t irDataStoreBuffer();
+uint8_t decodeIR(bool lastBit);
+uint8_t checkSum(uint8_t *buffer,uint8_t len);
+void bitToByteBuffer(uint8_t *buffer, uint8_t value, int restart,uint8_t *bufferPtr);
+void printARCState(uint8_t *recvData);
+uint8_t isOneMatched(uint16_t lowTimeCounter,uint16_t highTimecounter);
+uint8_t isZeroMatched(uint16_t lowTimeCounter,uint16_t highTimecounter);
+uint8_t isStartMatched(uint16_t lowTimeCounter,uint16_t highTimecounter);
+uint8_t isStopMatched(uint16_t lowTimeCounter,uint16_t highTimecounter);
+
 };
 
 #endif
