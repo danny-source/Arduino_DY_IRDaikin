@@ -1,17 +1,27 @@
+/*
+ * Arduino IRremote Daikin 2015
+ * Copyright 2015 danny
+ *
+ *
+ * Arduino PWM declare base on  Ken Shirriff's IRremote library.
+ * http://arcfn.com/2009/08/multi-protocol-infrared-remote-library.html
+ *
+ *
+ */
 
 #include <IRdaikinBRC.h>
 
 
 // # of bytes per command
-const int COMMAND_LENGTH_BRC = 22;    
+const int COMMAND_LENGTH_BRC = 22;
 
-unsigned char daikinBRC[COMMAND_LENGTH_BRC]     = { 
+unsigned char daikinBRC[COMMAND_LENGTH_BRC]     = {
 0x11,0xDA,0x17,0x18,0x04,0x00,0x1E,
 //0    1    2   3    4    5     6
 0x11,0xDA,0x17,0x18,0x00,0x73,0x00,0x21,0x00,
 //7, 8    9   10   11   12    13   14   15
 0x00,0x20,0x35,0x00,0x20,0x23};
-//16  17    18  19   20    21 
+//16  17    18  19   20    21
 
 static byte vFanTableBRC[] = { 0x00,0x20};
 //0 FAN 1 COOL 2 DRY
@@ -19,7 +29,7 @@ static byte vModeTableBRC12[] = { 0x60,0x20,0x70};
 static byte vModeTableBRC14[] = { 0x00,0x70,0x20};
 //22,23,24,25,26,27,28,29,30,31,32,33,34,35,36
 static byte vTempTableBRC[] = {26,28,30,32,34,36,38,40,
-	42,44,46,48,50,52,54};	
+	42,44,46,48,50,52,54};
 //
 // void IRdaikin()
 // {
@@ -34,7 +44,7 @@ IRDaikinSend irsend1;
 void IRdaikinBRC::daikin_on()
 {
 	daikinController_on();
-}  
+}
 
 void IRdaikinBRC::daikin_off()
 {
@@ -59,7 +69,7 @@ void IRdaikinBRC::daikin_setMode(int mode)
 {
 	if (mode>=0 && mode <=2)
 	{
-		daikinController_setMode(mode);		
+		daikinController_setMode(mode);
 	}
 }
 
@@ -77,7 +87,7 @@ void IRdaikinBRC::daikin_setTemp(uint8_t temp)
 	if (temp >= 18 && temp<=36)
 	{
 	//temp = temp-22;
-	//daikinBRC[17] = vTempTableBRC[temp];	
+	//daikinBRC[17] = vTempTableBRC[temp];
 		temp = temp - 9;
 		temp = temp << 1;
 		daikinBRC[17] = temp;
@@ -101,7 +111,7 @@ uint8_t IRdaikinBRC::daikinController_checksum()
 	}
 
         daikinBRC[6] = sum &0xFF;
-        
+
         sum=0;
 	for(i = 7; i <= 20; i++){
 		sum += daikinBRC[i];
@@ -109,7 +119,7 @@ uint8_t IRdaikinBRC::daikinController_checksum()
 
         daikinBRC[21] = sum &0xFF;
 
-        
+
 }
 
 void IRdaikinBRC::dump()
@@ -177,10 +187,10 @@ void IRdaikinBRC::daikinController_setMode(uint8_t mode)
 
 void IRdaikinBRC::sendDaikinCommand()
 {
-      daikinController_checksum();  
-      irsend1.sendDaikin(daikinBRC, 7,0); 
+      daikinController_checksum();
+      irsend1.sendDaikin(daikinBRC, 7,0);
       delay(29);
-      irsend1.sendDaikin(daikinBRC, 15,7); 
+      irsend1.sendDaikin(daikinBRC, 15,7);
 }
 
 void IRdaikinBRC::setPin(int pin)

@@ -1,19 +1,20 @@
 /*
  * Arduino IRremote Daikin 2015
  * Copyright 2015 danny
- * 
- * 
+ *
+ *
  * enableIROut declare base on  Ken Shirriff's IRremote library.
  * http://arcfn.com/2009/08/multi-protocol-infrared-remote-library.html
- * 
- * 
+ *
+ *
  */
 
-#include "IRremoteDaikin.h"
+#include "IRremoteDaikinSend.h"
 #include "IRremoteIntDaikin.h"
 
 // Provides ISR
 #include <avr/interrupt.h>
+
 
 int IRpin;
 
@@ -22,22 +23,22 @@ int data2;
   enableIROut(38);
 mark(DAIKIN_HDR_MARK);
 space(DAIKIN_HDR_SPACE);
-     
+
   for (int i = start; i < start+len; i++) {
-  data2=buf[i];  
-   
+  data2=buf[i];
+
   for (int j = 0; j < 8; j++) {
     if ((1 << j & data2)) {
       mark(DAIKIN_ONE_MARK);
       space(DAIKIN_ONE_SPACE);
- } 
+ }
     else {
       mark(DAIKIN_ZERO_MARK);
       space(DAIKIN_ZERO_SPACE);
-	  
+
     }
     }
- 
+
   }
       mark(DAIKIN_ONE_MARK);
 	  space(DAIKIN_ZERO_SPACE);
@@ -69,7 +70,7 @@ void IRDaikinSend::sendRaw(unsigned int buf[], int len, int hz)
   for (int i = 0; i < len; i++) {
     if (i & 1) {
       space(buf[i]);
-    } 
+    }
     else {
       mark(buf[i]);
     }
@@ -79,7 +80,7 @@ void IRDaikinSend::sendRaw(unsigned int buf[], int len, int hz)
 
 void IRDaikinSend::setPin(int pin) {
   pinMode(IRpin, OUTPUT);
-  digitalWrite(IRpin, LOW); // When not sending PWM, we want it low  
+  digitalWrite(IRpin, LOW); // When not sending PWM, we want it low
   IRpin = pin;
 }
 
@@ -131,10 +132,10 @@ void IRDaikinSend::enableIROut(int khz) {
   // A few hours staring at the ATmega documentation and this will all make sense.
   // See my Secrets of Arduino PWM at http://arcfn.com/2009/07/secrets-of-arduino-pwm.html for details.
 
-  
+
   // Disable the Timer2 Interrupt (which is used for receiving IR)
   //TIMER_DISABLE_INTR; //Timer2 Overflow Interrupt
-  
+
   pinMode(TIMER_PWM_PIN, OUTPUT);
   //digitalWrite(TIMER_PWM_PIN, HIGH); // When not sending PWM, we want it low
  //

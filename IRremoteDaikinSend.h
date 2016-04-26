@@ -1,16 +1,17 @@
 /*
  * Arduino IRremote Daikin 2015
  * Copyright 2015 danny
- * 
- * 
+ *
+ *
  * enableIROut declare base on  Ken Shirriff's IRremote library.
  * http://arcfn.com/2009/08/multi-protocol-infrared-remote-library.html
- * 
- * 
+ *
+ *
  */
 
-#ifndef IRremoteDaikin_h
-#define IRremoteDaikin_h
+#ifndef IRremoteDaikinSend_h
+#define IRremoteDaikinSend_h
+#include <IRremoteIntDaikin.h>
 
 // Only used for testing; can remove virtual for shorter code
 #define VIRTUAL
