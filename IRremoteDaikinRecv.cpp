@@ -19,7 +19,7 @@
 //~ #define DEBUG_IR_PRINT
 //~ #define DEBUG_IR_PRINT_DECODED_DATA
 
-	uint8_t irPin = 2;
+	uint8_t irPin = 7;
 //
 	uint8_t 	irState = 1;
 	uint8_t 	irLastState = 1;
@@ -46,6 +46,7 @@ uint8_t IRDaikinRecv::begin(uint8_t pin,uint8_t *buffer,uint8_t buffer_size)
 		return 0;
 	}
 	irPin = pin;
+	pinMode(irPin,INPUT);
 	irReceiveDataP0 = buffer;
 	memset(irReceiveDataP0,0,buffer_size);
 	hasPacket = 0;

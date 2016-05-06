@@ -39,9 +39,9 @@ IRDaikinRecv irrecv;
 
 //
 
-void IRdaikin::begin()
+void IRdaikin::begin(uint8_t irRecvPin)
 {
- 	irrecv.begin(2,irReceiveData,25);
+ 	irrecv.begin(irRecvPin,irReceiveData,25);
 }
 
 void IRdaikin::daikin_on()

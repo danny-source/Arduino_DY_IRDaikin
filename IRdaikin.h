@@ -17,7 +17,7 @@
 class IRdaikin
 {
 public:
-	void begin();
+	void begin(uint8_t irRecvPin);
 	void daikin_on();
 	void daikin_off();
 	void daikin_setPower(uint8_t state);
