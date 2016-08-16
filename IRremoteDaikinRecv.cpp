@@ -9,8 +9,12 @@
  *
  */
 #include <IRremoteDaikinRecv.h>
-#include <util/delay.h>
 
+#ifndef IRremoteintDaikinESP_h
+#include <util/delay.h>
+#else
+#define _delay_us delayMicroseconds
+#endif
 //decode
 #define SAMPLE_DELAY_TIME 10//uS
 #define IDLE_TIMER_COUNT ((1000*13)/SAMPLE_DELAY_TIME)//SAMPLE_DELAY_TIME*100*13

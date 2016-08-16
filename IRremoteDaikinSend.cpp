@@ -10,19 +10,19 @@
  */
 
 #include "IRremoteDaikinSend.h"
-#include "IRremoteIntDaikin.h"
 
 // Provides ISR
+#ifndef SOFT_IR
 #include <avr/interrupt.h>
+#endif
 
 
-int IRpin;
 
 void IRDaikinSend::sendDaikin(unsigned char buf[], int len, int start) {
 int data2;
   enableIROut(38);
-mark(DAIKIN_HDR_MARK);
-space(DAIKIN_HDR_SPACE);
+  mark(DAIKIN_HDR_MARK);
+  space(DAIKIN_HDR_SPACE);
 
   for (int i = start; i < start+len; i++) {
   data2=buf[i];
@@ -78,30 +78,13 @@ void IRDaikinSend::sendRaw(unsigned int buf[], int len, int hz)
   space(0); // Just to be sure
 }
 
-void IRDaikinSend::setPin(int pin) {
-  pinMode(IRpin, OUTPUT);
-  digitalWrite(IRpin, LOW); // When not sending PWM, we want it low
-  IRpin = pin;
+#ifndef SOFT_IR
+
+void IRDaikinSend::begin()
+{
+
 }
 
-//~ #if defined(SIMULATE)
-
-//~ void IRDaikinSend::mark(int time) {
-  //~ int cycleTime = time/25;
-  //~ for (int i = 0; i < cycleTime; ++i)
-  //~ {
-    //~ digitalWrite(IRpin,HIGH);
-    //~ delayMicroseconds(11);
-    //~ digitalWrite(IRpin,LOW);
-    //~ delayMicroseconds(5);
-  //~ }
-//~ }
-
-//~ void IRDaikinSend::space(int time) {
-  //~ digitalWrite(IRpin,LOW);
-  //~ delayMicroseconds(time);
-//~ }
-//~ #else
 void IRDaikinSend::mark(int time) {
   // Sends an IR mark for the specified number of microseconds.
   // The mark output is modulated at the PWM frequency.
@@ -118,7 +101,6 @@ void IRDaikinSend::space(int time) {
 }
 
 //~ #endif
-
 
 void IRDaikinSend::enableIROut(int khz) {
   // Enables IR output.  The khz value controls the modulation frequency in kilohertz.
@@ -148,3 +130,37 @@ void IRDaikinSend::enableIROut(int khz) {
   // The top value for the timer.  The modulation frequency will be SYSCLOCK / 2 / OCR2A.
   TIMER_CONFIG_KHZ(khz);
 }
+#else
+
+void IRDaikinSend::begin(int IRsendPin)
+{
+  pinMode(IRsendPin, OUTPUT);
+  digitalWrite(IRsendPin, LOW); // When not sending PWM, we want it low
+  IRpin = IRsendPin;
+}
+
+void IRDaikinSend::mark(int time) {
+  // Sends an IR mark for the specified number of microseconds.
+  // The mark output is modulated at the PWM frequency.
+  long beginning = micros();
+  while(micros() - beginning < time){
+    digitalWrite(IRpin, HIGH);
+    delayMicroseconds(halfPeriodicTime);
+    digitalWrite(IRpin, LOW);
+    delayMicroseconds(halfPeriodicTime); //38 kHz -> T = 26.31 microsec (periodic time), half of it is 13
+  }
+}
+
+/* Leave pin off for time (given in microseconds) */
+void IRDaikinSend::space(int time) {
+  // Sends an IR space for the specified number of microseconds.
+  // A space is no output, so the PWM output is disabled.
+  digitalWrite(IRpin, LOW);
+  if (time > 0) delayMicroseconds(time);
+}
+
+void IRDaikinSend::enableIROut(int khz) {
+  // Enables IR output.  The khz value controls the modulation frequency in kilohertz.
+  halfPeriodicTime = 500/khz; // T = 1/f but we need T/2 in microsecond and f is in kHz
+}
+#endif

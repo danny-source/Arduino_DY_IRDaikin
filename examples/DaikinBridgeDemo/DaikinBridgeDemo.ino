@@ -20,7 +20,6 @@ void setup()
   Serial.begin(115200);
   delay(500);
   Serial.println("DaikinBridgeDemo Start!");
-	irdaikin.begin();
 	irdaikin.daikin_on();
 	irdaikin.daikin_setSwing_off();
 	irdaikin.daikin_setMode(1);

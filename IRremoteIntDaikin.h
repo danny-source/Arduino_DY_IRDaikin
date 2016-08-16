@@ -12,12 +12,6 @@
 #ifndef IRremoteintDaikin_h
 #define IRremoteintDaikin_h
 
-#if defined(ARDUINO) && ARDUINO >= 100
-#include <Arduino.h>
-#else
-#include <WProgram.h>
-#endif
-
 // define which timer to use
 //
 // Uncomment the timer you wish to use on your board.  If you
@@ -83,19 +77,6 @@
 #ifndef sbi
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 #endif
-
-//DAIKIN
-#define DAIKIN_HDR_MARK	    3600 //DAIKIN_ZERO_MARK*8
-#define DAIKIN_HDR_SPACE	1600 //DAIKIN_ZERO_MARK*4
-#define DAIKIN_ONE_SPACE	1300
-#define DAIKIN_ONE_MARK	    380
-#define DAIKIN_ZERO_MARK	380
-#define DAIKIN_ZERO_SPACE   380
-
-
-// IR detector output is active low
-#define MARK  0
-#define SPACE 1
 
 #define TOPBIT 0x80000000
 //

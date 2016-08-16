@@ -11,7 +11,8 @@
 
 #ifndef IRremoteDaikinSend_h
 #define IRremoteDaikinSend_h
-#include <IRremoteIntDaikin.h>
+#include "IRdaikinDef.h"
+
 
 // Only used for testing; can remove virtual for shorter code
 #define VIRTUAL
@@ -20,15 +21,21 @@ class IRDaikinSend
 {
 public:
   IRDaikinSend() {}
+#ifndef SOFT_IR
+ void begin();
+#else
+  void begin(int IRsendPin);
+#endif
   void sendRaw(unsigned int buf[], int len, int hz);
   void sendDaikin(unsigned char buf[], int len,int start);
   void sendDaikinWake();
   // private:
   void enableIROut(int khz);
-  void setPin(int pin);
 private:
   VIRTUAL void mark(int usec);
   VIRTUAL void space(int usec);
+  int halfPeriodicTime;
+  int IRpin;  
 };
 
 #endif

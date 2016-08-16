@@ -34,15 +34,31 @@ static byte vFanTable[] = { 0x30,0x40,0x50,0x60,0x70,0xa0,0xb0};
 static byte vModeTable[] = { 0x6,0x3,0x2};
 //
 uint8_t	irReceiveData[25] = {0};
+
 IRDaikinSend irsend;
 IRDaikinRecv irrecv;
 
 //
 
+#ifndef SOFT_IR
 void IRdaikin::begin(uint8_t irRecvPin)
 {
  	irrecv.begin(irRecvPin,irReceiveData,25);
 }
+void IRdaikin::begin()
+{
+}
+#else
+void IRdaikin::begin(int IRsendPin, uint8_t irRecvPin)
+{
+	irsend.begin(IRsendPin);
+ 	irrecv.begin(irRecvPin,irReceiveData,25);
+}
+void IRdaikin::begin(int IRsendPin)
+{
+	irsend.begin(IRsendPin);
+}
+#endif
 
 void IRdaikin::daikin_on()
 {
@@ -257,10 +273,6 @@ void IRdaikin::sendDaikinCommand()
       irsend.sendDaikin(daikin, 8,0);
       delay(29);
       irsend.sendDaikin(daikin, 19,8);
-}
-void IRdaikin::setPin(int pin)
-{
-	irsend.setPin(pin);
 }
 
 uint8_t IRdaikin::decode() {
