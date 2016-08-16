@@ -11,12 +11,7 @@
 
 #ifndef IRremoteDaikinRecv_h
 #define IRremoteDaikinRecv_h
-#include <Arduino.h>
-#ifndef CORE_ESP8266_FEATURES_H
-#include <IRremoteIntDaikin.h>
-#else
-#include <IRremoteIntDaikinESP.h>
-#endif
+#include "IRdaikinDef.h"
 
 // Only used for testing; can remove virtual for shorter code
 #define VIRTUAL

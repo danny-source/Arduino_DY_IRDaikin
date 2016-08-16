@@ -13,7 +13,6 @@
 #define IRremoteDaikinSend_h
 #include "IRdaikinDef.h"
 
-
 // Only used for testing; can remove virtual for shorter code
 #define VIRTUAL
 

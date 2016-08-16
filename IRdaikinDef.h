@@ -2,7 +2,7 @@
 #ifndef IRdaikinDef_h
 #define IRdaikinDef_h
 
-//#define SOFT_IR
+#define SOFT_IR
 
 #if defined(ARDUINO) && ARDUINO >= 100
 #include <Arduino.h>

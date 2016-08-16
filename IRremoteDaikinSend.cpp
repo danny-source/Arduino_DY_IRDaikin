@@ -145,9 +145,24 @@ void IRDaikinSend::mark(int time) {
   long beginning = micros();
   while(micros() - beginning < time){
     digitalWrite(IRpin, HIGH);
-    delayMicroseconds(halfPeriodicTime);
+    #ifdef SOFT_IR
+    #ifdef CORE_ESP8266_FEATURES_H
+		delayMicroseconds(halfPeriodicTime-2);
+    #else
+		_delay_us(8);
+    #endif
+    #endif
+    delayMicroseconds(halfPeriodicTime-2);
     digitalWrite(IRpin, LOW);
-    delayMicroseconds(halfPeriodicTime); //38 kHz -> T = 26.31 microsec (periodic time), half of it is 13
+    //38 kHz -> T = 26.31 microsec (periodic time), half of it is 13
+    delayMicroseconds(halfPeriodicTime-2);
+    #ifdef SOFT_IR
+    #ifdef CORE_ESP8266_FEATURES_H
+		delayMicroseconds(halfPeriodicTime-2);
+    #else
+		_delay_us(5);
+    #endif
+    #endif 
   }
 }
 
@@ -161,6 +176,6 @@ void IRDaikinSend::space(int time) {
 
 void IRDaikinSend::enableIROut(int khz) {
   // Enables IR output.  The khz value controls the modulation frequency in kilohertz.
-  halfPeriodicTime = 500/khz; // T = 1/f but we need T/2 in microsecond and f is in kHz
+  halfPeriodicTime = (500/khz) + 1; // T = 1/f but we need T/2 in microsecond and f is in kHz
 }
 #endif
