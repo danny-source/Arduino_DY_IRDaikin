@@ -31,7 +31,7 @@ unsigned char daikin[COMMAND_LENGTH]     = {
 //0xB0,0x00,0x00,0x00,0x00,0x00,0x00,0xC0,0x00,0x00,0xE3 };
 static byte vFanTable[] = { 0x30,0x40,0x50,0x60,0x70,0xa0,0xb0};
 //0 FAN 1 COOL 2 DRY
-static byte vModeTable[] = { 0x6,0x3,0x2};
+static byte vModeTable[] = { 0x6,0x3,0x2,0x4};
 //
 uint8_t	irReceiveData[25] = {0};
 IRDaikinSend irsend;
@@ -100,7 +100,7 @@ uint8_t IRdaikin::daikin_getSwingState()
 
 void IRdaikin::daikin_setMode(uint8_t mode)
 {
-	if (mode>=0 && mode <=2)
+	if (mode>=0 && mode <=3)
 	{
 		daikinController_setMode(vModeTable[mode]);
 	}
