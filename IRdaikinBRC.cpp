@@ -41,16 +41,14 @@ static byte vTempTableBRC[] = {26,28,30,32,34,36,38,40,
 // }
 IRDaikinSend irsend1;
 
-#ifndef SOFT_IR
 void IRdaikinBRC::begin()
 {
+	irsend1.begin();
 }
-#else
 void IRdaikinBRC::begin(int IRsendPin)
 {
 	irsend1.begin(IRsendPin);
 }
-#endif
 
 void IRdaikinBRC::daikin_on()
 {

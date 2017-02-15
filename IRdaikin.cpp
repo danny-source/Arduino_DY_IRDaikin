@@ -40,15 +40,16 @@ IRDaikinRecv irrecv;
 
 //
 
-#ifndef SOFT_IR
 void IRdaikin::begin(uint8_t irRecvPin)
 {
  	irrecv.begin(irRecvPin,irReceiveData,25);
+ 	irsend.begin();
 }
 void IRdaikin::begin()
 {
+	irsend.begin();
 }
-#else
+
 void IRdaikin::begin(int IRsendPin, uint8_t irRecvPin)
 {
 	irsend.begin(IRsendPin);
@@ -58,7 +59,7 @@ void IRdaikin::begin(int IRsendPin)
 {
 	irsend.begin(IRsendPin);
 }
-#endif
+
 
 void IRdaikin::daikin_on()
 {

@@ -2,16 +2,15 @@
 #ifndef IRdaikinDef_h
 #define IRdaikinDef_h
 
-#define SOFT_IR
-
 #if defined(ARDUINO) && ARDUINO >= 100
 #include <Arduino.h>
 #else
 #include <WProgram.h>
 #endif
 
-#ifndef SOFT_IR
+#ifndef ESP8266
 #include <IRremoteIntDaikin.h>
+#include <avr/interrupt.h>
 #endif
 
 

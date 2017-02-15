@@ -14,27 +14,26 @@
 #include "IRdaikinDef.h"
 
 // Only used for testing; can remove virtual for shorter code
-#define VIRTUAL
+//#define VIRTUAL
 
 class IRDaikinSend
 {
 public:
   IRDaikinSend() {}
-#ifndef SOFT_IR
- void begin();
-#else
+  void begin();
   void begin(int IRsendPin);
-#endif
   void sendRaw(unsigned int buf[], int len, int hz);
   void sendDaikin(unsigned char buf[], int len,int start);
   void sendDaikinWake();
   // private:
   void enableIROut(int khz);
+  void mark(int usec);
+  void space(int usec);
+  void delayMicrosecondsEnhance(uint32_t usec);
 private:
-  VIRTUAL void mark(int usec);
-  VIRTUAL void space(int usec);
+	void delayMicrosecondsSys(uint32_t usec);
   int halfPeriodicTime;
-  int IRpin;  
+  int IRpin;
 };
 
 #endif

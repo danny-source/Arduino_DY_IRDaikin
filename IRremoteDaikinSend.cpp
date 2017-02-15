@@ -10,172 +10,160 @@
  */
 
 #include "IRremoteDaikinSend.h"
-
-// Provides ISR
-#ifndef SOFT_IR
-#include <avr/interrupt.h>
+#ifndef ESP8266
+#include <util/delay.h>
+#else
+#define _delay_us delayMicroseconds
+#define TIMER_ENABLE_PWM
+#define TIMER_DISABLE_PWM
+#define TIMER_CONFIG_KHZ
+#define TIMER_PWM_PIN 3
 #endif
 
+void IRDaikinSend::begin()
+{
+    IRpin = -1;
+	enableIROut(38);
+}
+
+void IRDaikinSend::begin(int IRsendPin)
+{
+    IRpin = IRsendPin;
+	enableIROut(38);
+    pinMode(IRpin, OUTPUT);
+    digitalWrite(IRpin, LOW); // When not sending PWM, we want it low
+}
 
 
 void IRDaikinSend::sendDaikin(unsigned char buf[], int len, int start) {
-int data2;
-  enableIROut(38);
-  mark(DAIKIN_HDR_MARK);
-  space(DAIKIN_HDR_SPACE);
+    int data2;
+    enableIROut(38);
+    mark(DAIKIN_HDR_MARK);
+    space(DAIKIN_HDR_SPACE);
 
-  for (int i = start; i < start+len; i++) {
-  data2=buf[i];
+    for (int i = start; i < start+len; i++) {
+        data2=buf[i];
 
-  for (int j = 0; j < 8; j++) {
-    if ((1 << j & data2)) {
-      mark(DAIKIN_ONE_MARK);
-      space(DAIKIN_ONE_SPACE);
- }
-    else {
-      mark(DAIKIN_ZERO_MARK);
-      space(DAIKIN_ZERO_SPACE);
+        for (int j = 0; j < 8; j++) {
+            if ((1 << j & data2)) {
+                mark(DAIKIN_ONE_MARK);
+                space(DAIKIN_ONE_SPACE);
+            }
+            else {
+                mark(DAIKIN_ZERO_MARK);
+                space(DAIKIN_ZERO_SPACE);
+
+            }
+        }
 
     }
-    }
-
-  }
-      mark(DAIKIN_ONE_MARK);
-	  space(DAIKIN_ZERO_SPACE);
-  }
+    mark(DAIKIN_ONE_MARK);
+    space(DAIKIN_ZERO_SPACE);
+}
 
 void IRDaikinSend::sendDaikinWake() {
-  enableIROut(38);
-  space(DAIKIN_ZERO_MARK);
-  //
-  mark(DAIKIN_ZERO_MARK);
-  space(DAIKIN_ZERO_MARK);
-  //
-  mark(DAIKIN_ZERO_MARK);
-  space(DAIKIN_ZERO_MARK);
-  //
-  mark(DAIKIN_ZERO_MARK);
-  space(DAIKIN_ZERO_MARK);
-  //
-  mark(DAIKIN_ZERO_MARK);
-  space(DAIKIN_ZERO_MARK);
-  //
-  mark(DAIKIN_ZERO_MARK);
-  space(DAIKIN_ZERO_MARK);
+    enableIROut(38);
+    space(DAIKIN_ZERO_MARK);
+    //
+    mark(DAIKIN_ZERO_MARK);
+    space(DAIKIN_ZERO_MARK);
+    //
+    mark(DAIKIN_ZERO_MARK);
+    space(DAIKIN_ZERO_MARK);
+    //
+    mark(DAIKIN_ZERO_MARK);
+    space(DAIKIN_ZERO_MARK);
+    //
+    mark(DAIKIN_ZERO_MARK);
+    space(DAIKIN_ZERO_MARK);
+    //
+    mark(DAIKIN_ZERO_MARK);
+    space(DAIKIN_ZERO_MARK);
 }
 
 void IRDaikinSend::sendRaw(unsigned int buf[], int len, int hz)
 {
-  enableIROut(hz);
-  for (int i = 0; i < len; i++) {
-    if (i & 1) {
-      space(buf[i]);
+    enableIROut(hz);
+    for (int i = 0; i < len; i++) {
+        if (i & 1) {
+            space(buf[i]);
+        }
+        else {
+            mark(buf[i]);
+        }
     }
-    else {
-      mark(buf[i]);
-    }
-  }
-  space(0); // Just to be sure
+    space(0); // Just to be sure
 }
 
-#ifndef SOFT_IR
-
-void IRDaikinSend::begin()
-{
-
-}
 
 void IRDaikinSend::mark(int time) {
-  // Sends an IR mark for the specified number of microseconds.
-  // The mark output is modulated at the PWM frequency.
-  TIMER_ENABLE_PWM; // Enable pin 3 PWM output
-  delayMicroseconds(time);
+    if (IRpin == -1) {
+		Serial.println();
+		Serial.println("PWM");
+        TIMER_ENABLE_PWM; // Enable pin 3 PWM output
+        delayMicrosecondsEnhance(time);
+    } else {
+		Serial.println();
+		Serial.print("SOFT:");
+		Serial.println(halfPeriodicTime);
+        unsigned long beginTime = micros();
+        unsigned long endTime = (unsigned long)time;
+        while (micros() - beginTime < endTime) {
+            digitalWrite(IRpin, HIGH);
+            delayMicrosecondsEnhance(halfPeriodicTime);
+            digitalWrite(IRpin, LOW);
+            // 38 kHz -> T = 26.31 microsec (periodic time), half of it is 13
+            delayMicrosecondsEnhance(halfPeriodicTime);
+        }
+    }
 }
 
 /* Leave pin off for time (given in microseconds) */
 void IRDaikinSend::space(int time) {
-  // Sends an IR space for the specified number of microseconds.
-  // A space is no output, so the PWM output is disabled.
-  TIMER_DISABLE_PWM; // Disable pin 3 PWM output
-  delayMicroseconds(time);
+    if (IRpin == -1) {
+        TIMER_DISABLE_PWM; // Disable pin 3 PWM output
+        delayMicrosecondsEnhance(time);
+    } else {
+        digitalWrite(IRpin, LOW);
+        if (time > 0) {
+            delayMicrosecondsEnhance(time);
+        }
+    }
 }
 
 //~ #endif
 
 void IRDaikinSend::enableIROut(int khz) {
-  // Enables IR output.  The khz value controls the modulation frequency in kilohertz.
-  // The IR output will be on pin 3 (OC2B).
-  // This routine is designed for 36-40KHz; if you use it for other values, it's up to you
-  // to make sure it gives reasonable results.  (Watch out for overflow / underflow / rounding.)
-  // TIMER2 is used in phase-correct PWM mode, with OCR2A controlling the frequency and OCR2B
-  // controlling the duty cycle.
-  // There is no prescaling, so the output frequency is 16MHz / (2 * OCR2A)
-  // To turn the output on and off, we leave the PWM running, but connect and disconnect the output pin.
-  // A few hours staring at the ATmega documentation and this will all make sense.
-  // See my Secrets of Arduino PWM at http://arcfn.com/2009/07/secrets-of-arduino-pwm.html for details.
-
-
-  // Disable the Timer2 Interrupt (which is used for receiving IR)
-  //TIMER_DISABLE_INTR; //Timer2 Overflow Interrupt
-
-  pinMode(TIMER_PWM_PIN, OUTPUT);
-  //digitalWrite(TIMER_PWM_PIN, HIGH); // When not sending PWM, we want it low
- //
-
-
-  // COM2A = 00: disconnect OC2A
-  // COM2B = 00: disconnect OC2B; to send signal set to 10: OC2B non-inverted
-  // WGM2 = 101: phase-correct PWM with OCRA as top
-  // CS2 = 000: no prescaling
-  // The top value for the timer.  The modulation frequency will be SYSCLOCK / 2 / OCR2A.
-  TIMER_CONFIG_KHZ(khz);
+    if (IRpin == -1) {
+        pinMode(TIMER_PWM_PIN, OUTPUT);
+        TIMER_CONFIG_KHZ(khz);
+    } else {
+        halfPeriodicTime = (500/khz); // T = 1/f but we need T/2 in microsecond and f is in kHz
+    }
 }
-#else
 
-void IRDaikinSend::begin(int IRsendPin)
+void IRDaikinSend::delayMicrosecondsEnhance(uint32_t usec)
 {
-  pinMode(IRsendPin, OUTPUT);
-  digitalWrite(IRsendPin, LOW); // When not sending PWM, we want it low
-  IRpin = IRsendPin;
+    if (usec > 100)
+    {
+        uint32_t tStart,tNow;
+
+        tStart = micros();
+        do
+        {
+            tNow=micros();
+        } while (tNow >= tStart && tNow < (tStart + usec - 1));
+    }
+    else
+    {
+        if (usec > 1)
+            delayMicroseconds(usec-1);
+    }
 }
 
-void IRDaikinSend::mark(int time) {
-  // Sends an IR mark for the specified number of microseconds.
-  // The mark output is modulated at the PWM frequency.
-  long beginning = micros();
-  while(micros() - beginning < time){
-    digitalWrite(IRpin, HIGH);
-    #ifdef SOFT_IR
-    #ifdef CORE_ESP8266_FEATURES_H
-		delayMicroseconds(halfPeriodicTime-2);
-    #else
-		_delay_us(8);
-    #endif
-    #endif
-    delayMicroseconds(halfPeriodicTime-2);
-    digitalWrite(IRpin, LOW);
-    //38 kHz -> T = 26.31 microsec (periodic time), half of it is 13
-    delayMicroseconds(halfPeriodicTime-2);
-    #ifdef SOFT_IR
-    #ifdef CORE_ESP8266_FEATURES_H
-		delayMicroseconds(halfPeriodicTime-2);
-    #else
-		_delay_us(5);
-    #endif
-    #endif 
+void IRDaikinSend::delayMicrosecondsSys(uint32_t usec) {
+  while(usec--) {
+    _delay_us(1);
+
   }
 }
-
-/* Leave pin off for time (given in microseconds) */
-void IRDaikinSend::space(int time) {
-  // Sends an IR space for the specified number of microseconds.
-  // A space is no output, so the PWM output is disabled.
-  digitalWrite(IRpin, LOW);
-  if (time > 0) delayMicroseconds(time);
-}
-
-void IRDaikinSend::enableIROut(int khz) {
-  // Enables IR output.  The khz value controls the modulation frequency in kilohertz.
-  halfPeriodicTime = (500/khz) + 1; // T = 1/f but we need T/2 in microsecond and f is in kHz
-}
-#endif

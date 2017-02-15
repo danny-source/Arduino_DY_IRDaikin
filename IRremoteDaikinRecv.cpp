@@ -10,7 +10,7 @@
  */
 #include <IRremoteDaikinRecv.h>
 
-#ifndef CORE_ESP8266_FEATURES_H
+#ifndef ESP8266
 #include <util/delay.h>
 #else
 #define _delay_us delayMicroseconds

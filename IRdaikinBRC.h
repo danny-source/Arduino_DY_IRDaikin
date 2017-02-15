@@ -17,11 +17,8 @@ class IRdaikinBRC
 {
 public:
   //void IRdaikin();
-#ifndef SOFT_IR
-void begin();
-#else
-void begin(int IRsendPin);
-#endif  
+	void begin();
+	void begin(int IRsendPin);
   void daikin_on();
   void daikin_off();
   void daikin_setSwing_on();

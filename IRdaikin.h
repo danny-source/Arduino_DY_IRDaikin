@@ -17,13 +17,11 @@
 class IRdaikin
 {
 public:
-#ifndef SOFT_IR
 	void begin(uint8_t irRecvPin);
 	void begin();
-#else
+	//soft IR
 	void begin(int IRsendPin, uint8_t irRecvPin);
 	void begin(int IRsendPin);
-#endif
 	void daikin_on();
 	void daikin_off();
 	void daikin_setPower(uint8_t state);

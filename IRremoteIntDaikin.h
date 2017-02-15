@@ -295,4 +295,6 @@
 #else // unknown timer
 #error "Internal code configuration error, no known IR_USE_TIMER# defined\n"
 #endif
+//
 #endif
+
