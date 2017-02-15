@@ -30,8 +30,8 @@ unsigned char daikin[COMMAND_LENGTH]     = {
 //16  17    18  19   20    21   22  23   24   25   26
 //0xB0,0x00,0x00,0x00,0x00,0x00,0x00,0xC0,0x00,0x00,0xE3 };
 static byte vFanTable[] = { 0x30,0x40,0x50,0x60,0x70,0xa0,0xb0};
-//0 FAN 1 COOL 2 DRY
-static byte vModeTable[] = { 0x6,0x3,0x2};
+//0 FAN 1 COOL 2 DRY 3 HEAT
+static byte vModeTable[] = { 0x6,0x3,0x2,0x4};
 //
 uint8_t	irReceiveData[25] = {0};
 
@@ -39,12 +39,6 @@ IRDaikinSend irsend;
 IRDaikinRecv irrecv;
 
 //
-
-void IRdaikin::begin(uint8_t irRecvPin)
-{
- 	irrecv.begin(irRecvPin,irReceiveData,25);
- 	irsend.begin();
-}
 void IRdaikin::begin()
 {
 	irsend.begin();
@@ -58,6 +52,11 @@ void IRdaikin::begin(int IRsendPin, uint8_t irRecvPin)
 void IRdaikin::begin(int IRsendPin)
 {
 	irsend.begin(IRsendPin);
+}
+
+void IRdaikin::decodePin(uint8_t irRecvPin)
+{
+ 	irrecv.begin(irRecvPin,irReceiveData,25);
 }
 
 
@@ -117,7 +116,7 @@ uint8_t IRdaikin::daikin_getSwingState()
 
 void IRdaikin::daikin_setMode(uint8_t mode)
 {
-	if (mode>=0 && mode <=2)
+	if (mode>=0 && mode <=3)
 	{
 		daikinController_setMode(vModeTable[mode]);
 	}
@@ -316,6 +315,7 @@ void IRdaikin::receivedIRUpdateToSendBuffer(uint8_t *recvData) {
 	if (mode == 0x6) mode = 0;
 	if (mode == 0x3) mode = 1;
 	if (mode == 0x2) mode = 2;
+	if (mode == 0x4) mode = 3;
 	//
 	uint8_t econo = (recvData[16] & B00000100) >> 2;
 	//set all state

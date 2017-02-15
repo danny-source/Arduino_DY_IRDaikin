@@ -1,7 +1,7 @@
 
 /*
- * 
- * 
+ *
+ *
  * Version 0.0.1 Aug, 2014
  * Copyright 2014 danny
  * https://github.com/danny-source/Arduino_IRremote_Daikin
@@ -15,8 +15,8 @@ int isOn;
 
 void setup()
 {
-  Serial.begin(9600);
- irdaikin.begin(3);
+  Serial.begin(115200);
+ irdaikin.begin(4);
  irdaikin.daikin_on();
  irdaikin.daikin_setFan(0);
  irdaikin.daikin_setTemp(25);

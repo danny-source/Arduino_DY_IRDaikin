@@ -7,10 +7,12 @@
 #######################################
 IRdaikin KEYWORD1 IRdaikin
 IRdaikinBRC KEYWORD1 IRdaikinBRC
+IRDaikinSend KEYWORD1 IRDaikinSend
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
 decode KEYWORD2
+decodePin KEYWORD2
 daikin_on KEYWORD2
 daikin_off KEYWORD2
 daikin_setSwing_on KEYWORD2

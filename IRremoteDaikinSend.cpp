@@ -106,15 +106,25 @@ void IRDaikinSend::mark(int time) {
 		Serial.println();
 		Serial.print("SOFT:");
 		Serial.println(halfPeriodicTime);
+		noInterrupts();
         unsigned long beginTime = micros();
         unsigned long endTime = (unsigned long)time;
         while (micros() - beginTime < endTime) {
             digitalWrite(IRpin, HIGH);
+            #ifdef ESP8266
             delayMicrosecondsEnhance(halfPeriodicTime);
+            #else
+            delayMicrosecondsEnhance(halfPeriodicTime - 6);
+            #endif
             digitalWrite(IRpin, LOW);
             // 38 kHz -> T = 26.31 microsec (periodic time), half of it is 13
+            #ifdef ESP8266
             delayMicrosecondsEnhance(halfPeriodicTime);
+            #else
+            delayMicrosecondsEnhance(halfPeriodicTime - 10);
+            #endif
         }
+        interrupts();
     }
 }
 

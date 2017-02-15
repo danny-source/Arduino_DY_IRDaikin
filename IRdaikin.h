@@ -17,7 +17,6 @@
 class IRdaikin
 {
 public:
-	void begin(uint8_t irRecvPin);
 	void begin();
 	//soft IR
 	void begin(int IRsendPin, uint8_t irRecvPin);
@@ -41,6 +40,7 @@ public:
 	uint8_t daikin_getFan();
 	uint8_t daikin_getTemp();
 	uint8_t decode();
+	void decodePin(uint8_t irRecvPin);
 
 private:
 void daikinController_on();

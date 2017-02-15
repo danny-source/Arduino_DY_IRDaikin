@@ -1,7 +1,7 @@
 
 /*
- * 
- * 
+ *
+ *
  * Version 0.0.1 Aug, 2014
  * Copyright 2014 danny
  * https://github.com/danny-source/Arduino_IRremote_Daikin
@@ -15,7 +15,7 @@ int isOn;
 
 void setup()
 {
-	Serial.begin(9600);
+	Serial.begin(115200);
 	irdaikin.begin();
 	irdaikin.daikin_on();
 	irdaikin.daikin_setSwing_off();
@@ -29,7 +29,7 @@ void setup()
 
 void loop() {
 	while (Serial.available() > 0) {
-	
+
 		if (Serial.read() == '\n') {
 			if (isOn == 0){
 				isOn = 1;
