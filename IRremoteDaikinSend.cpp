@@ -98,14 +98,14 @@ void IRDaikinSend::sendRaw(unsigned int buf[], int len, int hz)
 
 void IRDaikinSend::mark(int time) {
     if (IRpin == -1) {
-		Serial.println();
-		Serial.println("PWM");
+		//Serial.println();
+		//Serial.println("PWM");
         TIMER_ENABLE_PWM; // Enable pin 3 PWM output
         delayMicrosecondsEnhance(time);
     } else {
-		Serial.println();
-		Serial.print("SOFT:");
-		Serial.println(halfPeriodicTime);
+		//Serial.println();
+		//Serial.print("SOFT:");
+		//Serial.println(halfPeriodicTime);
 		noInterrupts();
         unsigned long beginTime = micros();
         unsigned long endTime = (unsigned long)time;

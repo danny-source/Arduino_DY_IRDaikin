@@ -16,6 +16,7 @@
 
 ## Changelog:
 
+1.0.1  Support ESP8266 Soft and Arduino PWM IR Signal
 1.0.0  Refactory code and ARC support decode ir.
 0.0.5  In order to isolate,IRremote renamed IRremoteDaikin and refactory,
 
@@ -24,6 +25,8 @@
   - pin 3:UNO
   - pin 2:Leonardo
   - pin 9:Mega
+  - pin 4:ESP8266
+  - pin 5:ESP8266
 
 ## Setting function Daikin ARC:
 
@@ -31,7 +34,7 @@
 - daikin_off();//turn off
 - daikin_setSwing_on();//turn on swing
 - daikin_setSwing_off();//turn off swing
-- daikin_setMode(int mode);//0=FAN, 1=COOL, 2=DRY
+- daikin_setMode(int mode);//0=FAN, 1=COOL, 2=DRY, 3=HEAT(if you have one)
 - daikin_setFan(int speed);// 0~4=speed(1,2,3,4,5),5=auto,6=moon
 - daikin_setTemp(int temp);//18 ~ 32 Celsius,if you using Fahrenheit ,maybe to enter Fahrenheit.
 - daikin_sendCommand();
