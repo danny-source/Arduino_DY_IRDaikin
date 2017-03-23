@@ -10,7 +10,7 @@
  */
 #include <IRremoteDaikinRecv.h>
 
-#ifndef ESP8266
+#if (!(defined(ARDUINO_ARCH_AMEBA)|defined(ESP8266)))
 #include <util/delay.h>
 #else
 #define _delay_us delayMicroseconds

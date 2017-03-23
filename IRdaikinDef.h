@@ -8,7 +8,7 @@
 #include <WProgram.h>
 #endif
 
-#ifndef ESP8266
+#if (!(defined(ARDUINO_ARCH_AMEBA)|defined(ESP8266)))
 #include <IRremoteIntDaikin.h>
 #include <avr/interrupt.h>
 #endif

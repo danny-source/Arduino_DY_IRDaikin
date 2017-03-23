@@ -10,7 +10,7 @@
  */
 
 #include "IRremoteDaikinSend.h"
-#ifndef ESP8266
+#if (!(defined(ARDUINO_ARCH_AMEBA)|defined(ESP8266)))
 #include <util/delay.h>
 #else
 #define _delay_us delayMicroseconds
@@ -111,14 +111,14 @@ void IRDaikinSend::mark(int time) {
         unsigned long endTime = (unsigned long)time;
         while (micros() - beginTime < endTime) {
             digitalWrite(IRpin, HIGH);
-            #ifdef ESP8266
+            #if(defined(ARDUINO_ARCH_AMEBA)|defined(ESP8266))
             delayMicrosecondsEnhance(halfPeriodicTime);
             #else
             delayMicrosecondsEnhance(halfPeriodicTime - 6);
             #endif
             digitalWrite(IRpin, LOW);
             // 38 kHz -> T = 26.31 microsec (periodic time), half of it is 13
-            #ifdef ESP8266
+            #if(defined(ARDUINO_ARCH_AMEBA)|defined(ESP8266))
             delayMicrosecondsEnhance(halfPeriodicTime);
             #else
             delayMicrosecondsEnhance(halfPeriodicTime - 10);
