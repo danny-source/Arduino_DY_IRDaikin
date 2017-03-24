@@ -1,3 +1,4 @@
+
 #ifndef DYIRDaikinSend_h
 #define DYIRDaikinSend_h
 #include "DYIRDaikinDef.h"

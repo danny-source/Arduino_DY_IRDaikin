@@ -11,30 +11,30 @@ public:
     //soft IR
     void begin(int IRsendPin, uint8_t irRecvPin);
     void begin(int IRsendPin);
-    void daikin_on();
-    void daikin_off();
-    void daikin_setPower(uint8_t state);
-    void daikin_setSwing_on();
-    void daikin_setSwing_off();
-    void daikin_setSwing(uint8_t state);
-    void daikin_setMode(uint8_t mode);//0 FAN, 1 COOL, 2 DRY
-    void daikin_setFan(uint8_t speed);// 0~4 speed,5 auto,6 moon
-    void daikin_setTemp(uint8_t temp);//23 ~ 33
-    void daikin_sendCommand();
+    void on();
+    void off();
+    void setPower(uint8_t state);
+    void setSwing_on();
+    void setSwing_off();
+    void setSwing(uint8_t state);
+    void setMode(uint8_t mode);//0 FAN, 1 COOL, 2 DRY
+    void setFan(uint8_t speed);// 0~4 speed,5 auto,6 moon
+    void setTemp(uint8_t temp);//23 ~ 33
+    void sendCommand();
     void dump();
     void description();
     //
-    uint8_t daikin_getPower();
-    uint8_t daikin_getSwingState();
-    uint8_t daikin_getMode();
-    uint8_t daikin_getFan();
-    uint8_t daikin_getTemp();
+    uint8_t getPower();
+    uint8_t getSwing();
+    uint8_t getMode();
+    uint8_t getFan();
+    uint8_t getTemp();
     uint8_t decode();
     void decodePin(uint8_t irRecvPin);
 
 private:
-    DYIRDaikinSend irsend;
-    DYIRDaikinRecv irrecv;
+    DYIRDaikinSend _irsend;
+    DYIRDaikinRecv _irrecv;
     unsigned char daikinHeader[8] = {
         0x11,0xDA,0x27,0x00,0xC5,0x00,0x00,0xD7
     };
@@ -52,15 +52,8 @@ private:
     byte vModeTable[5] = { 0x6,0x3,0x2,0x4};
 //
     uint8_t	irReceiveData[25] = {0};
-
-    void daikinController_on();
-    void daikinController_off();
-    void daikinController_setTemp(uint8_t temp);
-    void daikinController_setFan(uint8_t fan);
-    void daikinController_setMode(uint8_t mode);
     void sendDaikinCommand();
-    uint8_t daikinController_checksum();
-    uint8_t daikinController_getState();
+    uint8_t checksum();
 //
     void receivedIRUpdateToSendBuffer(uint8_t *recvData);
 };

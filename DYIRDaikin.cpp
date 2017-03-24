@@ -1,85 +1,76 @@
-/*
- * Arduino IRremote Daikin 2015
- * Copyright 2015 danny
- *
- *
- * Arduino PWM declare base on  Ken Shirriff's IRremote library.
- * http://arcfn.com/2009/08/multi-protocol-infrared-remote-library.html
- *
- *
- */
-
 
 #include <DYIRDaikin.h>
 
 //
 void DYIRDaikin::begin()
 {
-	irsend.begin();
+	_irsend.begin();
 }
 
 void DYIRDaikin::begin(int IRsendPin, uint8_t irRecvPin)
 {
-	irsend.begin(IRsendPin);
- 	irrecv.begin(irRecvPin,irReceiveData,25);
+	_irsend.begin(IRsendPin);
+ 	_irrecv.begin(irRecvPin,irReceiveData,25);
 }
 void DYIRDaikin::begin(int IRsendPin)
 {
-	irsend.begin(IRsendPin);
+	_irsend.begin(IRsendPin);
 }
 
 void DYIRDaikin::decodePin(uint8_t irRecvPin)
 {
- 	irrecv.begin(irRecvPin,irReceiveData,25);
+ 	_irrecv.begin(irRecvPin,irReceiveData,25);
 }
 
 
-void DYIRDaikin::daikin_on()
+void DYIRDaikin::on()
 {
-	daikinController_on();
+	daikin[13] |= 0x01;
+	checksum();
 }
 
-void DYIRDaikin::daikin_off()
+void DYIRDaikin::off()
 {
-	daikinController_off();
+	daikin[13] &= 0xFE;
+	checksum();
 }
 
-void DYIRDaikin::daikin_setPower(uint8_t state)
+void DYIRDaikin::setPower(uint8_t state)
 {
-	if (state == 1) {
-		daikinController_on();
+	if (state == 0) {
+		off();
 	}else {
-		daikinController_off();
+		on();
 	}
 }
 
-uint8_t DYIRDaikin::daikin_getPower()
+uint8_t DYIRDaikin::getPower()
 {
 	return (daikin[13] & 0x01);
 }
 
-void DYIRDaikin::daikin_setSwing_on()
+void DYIRDaikin::setSwing_on()
 {
 	daikin[16] |=0x0f;
-	daikinController_checksum();
+	checksum();
 }
 
-void DYIRDaikin::daikin_setSwing_off()
+void DYIRDaikin::setSwing_off()
 {
 	daikin[16] &=0xf0;
-	daikinController_checksum();
+	checksum();
 }
 
-void DYIRDaikin::daikin_setSwing(uint8_t state)
+void DYIRDaikin::setSwing(uint8_t state)
 {
-	if (state == 1) {
-		daikin_setSwing_on();
+	if (state == 0) {
+		setSwing_off();
 	}else {
-		daikin_setSwing_off();
+		setSwing_on();
 	}
 }
 
-uint8_t DYIRDaikin::daikin_getSwingState()
+uint8_t DYIRDaikin::getSwing()
 {
 	uint8_t state = daikin[16] & 0x0f;
 	if (state == 0x0f) {
@@ -88,15 +79,17 @@ uint8_t DYIRDaikin::daikin_getSwingState()
 	return 0;
 }
 
-void DYIRDaikin::daikin_setMode(uint8_t mode)
+void DYIRDaikin::setMode(uint8_t mode)
 {
+	uint8_t trmode = vModeTable[mode];
 	if (mode>=0 && mode <=3)
 	{
-		daikinController_setMode(vModeTable[mode]);
+		daikin[13]=trmode<<4 | getPower();
+		checksum();
 	}
 }
 
-uint8_t DYIRDaikin::daikin_getMode()
+uint8_t DYIRDaikin::getMode()
 {
 	uint8_t mode = (daikin[13] & B01110000) >> 4;
 	if (mode == 0x6) mode = 0;
@@ -106,15 +99,18 @@ uint8_t DYIRDaikin::daikin_getMode()
 }
 
 // 0~4 speed,5 auto,6 moon
-void DYIRDaikin::daikin_setFan(uint8_t speed)
+void DYIRDaikin::setFan(uint8_t speed)
 {
+	uint8_t fan = vFanTable[speed];
 	if (speed>=0 && speed <=6)
 	{
-		daikinController_setFan(vFanTable[speed]);
+		daikin[16] &= 0x0f;
+		daikin[16] |= fan;
+		checksum();
 	}
 }
 
-uint8_t DYIRDaikin::daikin_getFan()
+uint8_t DYIRDaikin::getFan()
 {
 	uint8_t fan = (daikin[16] & 0xf0);
 	if (fan == 0x30) fan = 0;
@@ -127,22 +123,22 @@ uint8_t DYIRDaikin::daikin_getFan()
 	return fan;
 }
 
-void DYIRDaikin::daikin_setTemp(uint8_t temp)
+void DYIRDaikin::setTemp(uint8_t temp)
 {
 	if (temp >= 18 && temp<=32)
 	{
 		daikin[14] = (temp)*2;
-		daikinController_checksum();
+		checksum();
 	}
 }
 
-uint8_t DYIRDaikin::daikin_getTemp()
+uint8_t DYIRDaikin::getTemp()
 {
 	uint8_t temperature= (daikin[14] & B01111110) >> 1;
 	return temperature;
 }
 
-void DYIRDaikin::daikin_sendCommand()
+void DYIRDaikin::sendCommand()
 {
 		sendDaikinCommand();
 }
@@ -160,24 +156,24 @@ void DYIRDaikin::description()
 {
 	Serial.print(F("\r\n==send buffer==\r\n"));
 	Serial.print(F("Power:"));
-	Serial.print(daikin_getPower(),DEC);
+	Serial.print(getPower(),DEC);
 	Serial.println();
 	Serial.print(F("Mode:"));
-	Serial.print(daikin_getMode(),DEC);
+	Serial.print(getMode(),DEC);
 	Serial.println();
 	Serial.print(F("Fan:"));
-	Serial.print(daikin_getFan(),DEC);
+	Serial.print(getFan(),DEC);
 	Serial.println();
 	Serial.print(F("Temperature:"));
-	Serial.print(daikin_getTemp(),DEC);
+	Serial.print(getTemp(),DEC);
 	Serial.println();
 	Serial.print(F("Swing:"));
-	Serial.print(daikin_getSwingState(),DEC);
+	Serial.print(getSwing(),DEC);
 	Serial.println();
 }
 
 //private function
-uint8_t DYIRDaikin::daikinController_checksum()
+uint8_t DYIRDaikin::checksum()
 {
 	uint8_t sum = 0;
 	uint8_t i;
@@ -199,58 +195,22 @@ uint8_t DYIRDaikin::daikinController_checksum()
 
 }
 
-void DYIRDaikin::daikinController_on()
-{
-	daikin[13] |= 0x01;
-	daikinController_checksum();
-}
-
-void DYIRDaikin::daikinController_off()
-{
-	daikin[13] &= 0xFE;
-	daikinController_checksum();
-}
-
-void DYIRDaikin::daikinController_setTemp(uint8_t temp)
-{
-	daikin[14] = (temp)*2;
-	daikinController_checksum();
-}
-
-
-void DYIRDaikin::daikinController_setFan(uint8_t fan)
-{
-	daikin[16] &= 0x0f;
-	daikin[16] |= fan;
-	daikinController_checksum();
-}
-
-uint8_t DYIRDaikin::daikinController_getState()
-{
-	return (daikin[13])&0x01;
-}
-
-void DYIRDaikin::daikinController_setMode(uint8_t mode)
-{
-	daikin[13]=mode<<4 | daikinController_getState();
-	daikinController_checksum();
-}
 
 void DYIRDaikin::sendDaikinCommand()
 {
-	  //~ irsend.sendDaikinWake();
+	  //~ _irsend.sendDaikinWake();
       //~ delay(20);
-      //~ irsend.sendDaikin(daikinHeader, 9,0);
+      //~ _irsend.sendDaikin(daikinHeader, 9,0);
       //~ delay(29);
       delay(25);
-      daikinController_checksum();
-      irsend.sendDaikin(daikin, 8,0);
+      checksum();
+      _irsend.sendDaikin(daikin, 8,0);
       delay(29);
-      irsend.sendDaikin(daikin, 19,8);
+      _irsend.sendDaikin(daikin, 19,8);
 }
 
 uint8_t DYIRDaikin::decode() {
-	if (irrecv.decode()>10) {
+	if (_irrecv.decode()>10) {
 		receivedIRUpdateToSendBuffer(irReceiveData);
 		return 1;
 	}
@@ -293,11 +253,11 @@ void DYIRDaikin::receivedIRUpdateToSendBuffer(uint8_t *recvData) {
 	//
 	uint8_t econo = (recvData[16] & B00000100) >> 2;
 	//set all state
-	daikin_setPower(powerState);
-	daikin_setMode(mode);
-	daikin_setFan(fan);
-	daikin_setTemp(temperature);
-	daikin_setSwing(swing);
+	setPower(powerState);
+	setMode(mode);
+	setFan(fan);
+	setTemp(temperature);
+	setSwing(swing);
 
 
 	//~ Serial.print(F("\r\n==receive buffer==\r\n"));
