@@ -16,7 +16,7 @@
 
 ## Changelog:
 
-1.0.2  Support ESP8266/Ambea Soft and Arduino PWM IR Signal
+1.0.2  Support ESP8266/Ameba Soft and Arduino PWM IR Signal
 
 1.0.1  Support ESP8266 Soft and Arduino PWM IR Signal
 
@@ -44,7 +44,7 @@
   - pin 4:GPIO4
   - pin 5:GPIO5
 
-### Ambea RTL8195
+### Ameba RTL8195
 
   - pin 2:D2
   - pin 3:D3
@@ -53,7 +53,7 @@
   - pin 6:D6
   - pin 7:D7
 
-### Ambea RTL8710
+### Ameba RTL8710
 
   - pin 2:D2
   - pin 5:D5
