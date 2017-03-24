@@ -2,15 +2,31 @@
 #ifndef DYIRDaikinDef_h
 #define DYIRDaikinDef_h
 
+#define AVR_HARDWARE_PWM \
+		(defined(__AVR_ATmega1280__) | defined(__AVR_ATmega2560__) | \
+		defined(__AVR_AT90USB162__) | defined(__AVR_ATmega32U4__) | \
+		defined(__AVR_AT90USB646__) | defined(__AVR_AT90USB1286__) | \
+		defined(__AVR_ATmega644P__) | defined(__AVR_ATmega644__) | \
+		defined(__AVR_ATmega8P__) | defined(__AVR_ATmega8__))
+
 #if defined(ARDUINO) && ARDUINO >= 100
 #include <Arduino.h>
 #else
 #include <WProgram.h>
 #endif
 
-#if (!(defined(ARDUINO_ARCH_AMEBA)|defined(ESP8266)))
+#if AVR_HARDWARE_PWM
 #include <DYIRDaikinPWM.h>
 #include <avr/interrupt.h>
+#include <util/delay.h>
+#warning "Use PWM IR to Send!"
+#else
+#define _delay_us delayMicroseconds
+#define TIMER_ENABLE_PWM
+#define TIMER_DISABLE_PWM
+#define TIMER_CONFIG_KHZ
+#define TIMER_PWM_PIN 3
+#warning "Use soft IR to Simulate!"
 #endif
 
 

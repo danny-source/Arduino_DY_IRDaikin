@@ -10,15 +10,6 @@
  */
 
 #include "DYIRDaikinSend.h"
-#if (!(defined(ARDUINO_ARCH_AMEBA)|defined(ESP8266)))
-#include <util/delay.h>
-#else
-#define _delay_us delayMicroseconds
-#define TIMER_ENABLE_PWM
-#define TIMER_DISABLE_PWM
-#define TIMER_CONFIG_KHZ
-#define TIMER_PWM_PIN 3
-#endif
 
 void DYIRDaikinSend::begin()
 {
