@@ -7,14 +7,14 @@ void DYIRDaikin::begin()
 	_irsend.begin();
 }
 
-void DYIRDaikin::begin(int IRsendPin, uint8_t irRecvPin)
+void DYIRDaikin::begin(int irSendPin, uint8_t irRecvPin)
 {
-	_irsend.begin(IRsendPin);
+	_irsend.begin(irSendPin);
  	_irrecv.begin(irRecvPin,irReceiveData,25);
 }
-void DYIRDaikin::begin(int IRsendPin)
+void DYIRDaikin::begin(int irSendPin)
 {
-	_irsend.begin(IRsendPin);
+	_irsend.begin(irSendPin);
 }
 
 void DYIRDaikin::decodePin(uint8_t irRecvPin)
@@ -79,6 +79,32 @@ uint8_t DYIRDaikin::getSwing()
 	return 0;
 }
 
+void DYIRDaikin::setSwingLR_on()
+{
+	daikin[17] = daikin[17] | 0x0F;
+	checksum();
+}
+
+void DYIRDaikin::setSwingLR_off()
+{
+	daikin[17] = daikin[17] & 0xF0;
+	checksum();
+}
+
+void DYIRDaikin::setSwingLR(uint8_t state)
+{
+    if (state == 0) {
+        setSwingLR_off();
+	}else {
+        setSwingLR_on();
+	}
+}
+
+uint8_t DYIRDaikin::getSwingLR()
+{
+    return (daikin[17]) & 0x01;
+}
+
 void DYIRDaikin::setMode(uint8_t mode)
 {
 	uint8_t trmode = vModeTable[mode];
@@ -140,7 +166,15 @@ uint8_t DYIRDaikin::getTemp()
 
 void DYIRDaikin::sendCommand()
 {
-		sendDaikinCommand();
+	  //~ _irsend.sendDaikinWake();
+      //~ delay(20);
+      //~ _irsend.sendDaikin(daikinHeader, 9,0);
+      //~ delay(29);
+      delay(25);
+      checksum();
+      _irsend.sendDaikin(daikin, 8,0);
+      delay(29);
+      _irsend.sendDaikin(daikin, 19,8);
 }
 //
 void DYIRDaikin::dump()
@@ -170,6 +204,9 @@ void DYIRDaikin::description()
 	Serial.print(F("Swing:"));
 	Serial.print(getSwing(),DEC);
 	Serial.println();
+	Serial.print(F("SwingLR:"));
+	Serial.print(getSwingLR(),DEC);
+	Serial.println();
 }
 
 //private function
@@ -195,22 +232,8 @@ uint8_t DYIRDaikin::checksum()
 
 }
 
-
-void DYIRDaikin::sendDaikinCommand()
-{
-	  //~ _irsend.sendDaikinWake();
-      //~ delay(20);
-      //~ _irsend.sendDaikin(daikinHeader, 9,0);
-      //~ delay(29);
-      delay(25);
-      checksum();
-      _irsend.sendDaikin(daikin, 8,0);
-      delay(29);
-      _irsend.sendDaikin(daikin, 19,8);
-}
-
 uint8_t DYIRDaikin::decode() {
-	if (_irrecv.decode()>10) {
+	if (_irrecv.decode() > 10) {
 		receivedIRUpdateToSendBuffer(irReceiveData);
 		return 1;
 	}
