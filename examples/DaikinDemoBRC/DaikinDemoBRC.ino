@@ -7,10 +7,10 @@
  * https://github.com/danny-source/Arduino_IRremote_Daikin
  */
 
-#include <IRdaikinBRC.h>
+#include <DYIRDaikinBRC.h>
 
 
-IRdaikinBRC irdaikin;
+DYIRDaikinBRC irdaikin;
 int isOn;
 
 void setup()

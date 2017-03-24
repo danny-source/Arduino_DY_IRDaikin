@@ -8,7 +8,7 @@
  *
  *
  */
-#include <IRremoteDaikinRecv.h>
+#include <DYIRDaikinRecv.h>
 
 #if (!(defined(ARDUINO_ARCH_AMEBA)|defined(ESP8266)))
 #include <util/delay.h>
@@ -44,7 +44,7 @@
 	uint8_t	*irReceiveDataP0;
 	uint8_t	irReceiveDataLen = 0;
 //
-uint8_t IRDaikinRecv::begin(uint8_t pin,uint8_t *buffer,uint8_t buffer_size)
+uint8_t DYIRDaikinRecv::begin(uint8_t pin,uint8_t *buffer,uint8_t buffer_size)
 {
 	if (buffer_size <24) {
 		return 0;
@@ -65,7 +65,7 @@ uint8_t IRDaikinRecv::begin(uint8_t pin,uint8_t *buffer,uint8_t buffer_size)
 	return 1;
 }
 
-uint8_t IRDaikinRecv::decode() {
+uint8_t DYIRDaikinRecv::decode() {
 
   // put your main code here, to run repeatedly:
   for (;;) {
@@ -165,7 +165,7 @@ uint8_t IRDaikinRecv::decode() {
 /*
  * 0:none 1:store to buffer 2:pair store to buffer
 */
-uint8_t IRDaikinRecv::irDataStoreBuffer()
+uint8_t DYIRDaikinRecv::irDataStoreBuffer()
 {
 	if (irRawSateMachine == 0) {
 		if (irLastState == 0) {
@@ -192,7 +192,7 @@ uint8_t IRDaikinRecv::irDataStoreBuffer()
 	}
 }
 
-uint8_t IRDaikinRecv::decodeIR(bool lastBit) {
+uint8_t DYIRDaikinRecv::decodeIR(bool lastBit) {
 
 	if (irPatternStateMachine == 0) {
 		//~ skip wake up pattern
@@ -254,7 +254,7 @@ uint8_t IRDaikinRecv::decodeIR(bool lastBit) {
 	}
 }
 
-uint8_t IRDaikinRecv::checkSum(uint8_t *buffer,uint8_t len)
+uint8_t DYIRDaikinRecv::checkSum(uint8_t *buffer,uint8_t len)
 {
 	uint8_t sum = 0;
 	for (uint8_t i =0;i< (len - 1);i++) {
@@ -271,7 +271,7 @@ uint8_t IRDaikinRecv::checkSum(uint8_t *buffer,uint8_t len)
 	return 0;
 }
 
-void IRDaikinRecv::bitToByteBuffer(uint8_t *buffer, uint8_t value, int restart,uint8_t *bufferPtr) {
+void DYIRDaikinRecv::bitToByteBuffer(uint8_t *buffer, uint8_t value, int restart,uint8_t *bufferPtr) {
 	static uint8_t bitIndex = 0;
 	static uint8_t bufferIndex = 0;
 	//~ Serial.print(value,DEC);
@@ -298,7 +298,7 @@ void IRDaikinRecv::bitToByteBuffer(uint8_t *buffer, uint8_t value, int restart,u
 	}
 }
 //
-void IRDaikinRecv::printARCState(uint8_t *recvData) {
+void DYIRDaikinRecv::printARCState(uint8_t *recvData) {
 	//~ static byte vFanTable[] = { 0x30,0x40,0x50,0x60,0x70,0xa0,0xb0};
 	uint8_t temperature= (recvData[6] & B01111110) >> 1;
 	uint8_t fan = (recvData[8] & 0xf0);
@@ -373,7 +373,7 @@ void IRDaikinRecv::printARCState(uint8_t *recvData) {
 	//~ Serial.println();
 }
 
-uint8_t IRDaikinRecv::isOneMatched(uint16_t lowTimeCounter,uint16_t highTimecounter)
+uint8_t DYIRDaikinRecv::isOneMatched(uint16_t lowTimeCounter,uint16_t highTimecounter)
 {
 	if ((lowTimeCounter > 15 && lowTimeCounter < 50) && (highTimecounter > (lowTimeCounter + lowTimeCounter)  && highTimecounter < 200)) {
 		return 1;
@@ -381,7 +381,7 @@ uint8_t IRDaikinRecv::isOneMatched(uint16_t lowTimeCounter,uint16_t highTimecoun
 	return 0;
 }
 
-uint8_t IRDaikinRecv::isZeroMatched(uint16_t lowTimeCounter,uint16_t highTimecounter)
+uint8_t DYIRDaikinRecv::isZeroMatched(uint16_t lowTimeCounter,uint16_t highTimecounter)
 {
 
 	if ((lowTimeCounter > 15 && lowTimeCounter < 50) && (highTimecounter > 15 && highTimecounter < 50)) {
@@ -390,7 +390,7 @@ uint8_t IRDaikinRecv::isZeroMatched(uint16_t lowTimeCounter,uint16_t highTimecou
 	return 0;
 }
 
-uint8_t IRDaikinRecv::isStartMatched(uint16_t lowTimeCounter,uint16_t highTimecounter)
+uint8_t DYIRDaikinRecv::isStartMatched(uint16_t lowTimeCounter,uint16_t highTimecounter)
 {
 	if ((lowTimeCounter > 100 && lowTimeCounter < 400) && (highTimecounter > 70  && highTimecounter < 250)) {
 		return 1;
@@ -398,7 +398,7 @@ uint8_t IRDaikinRecv::isStartMatched(uint16_t lowTimeCounter,uint16_t highTimeco
 	return 0;
 }
 
-uint8_t IRDaikinRecv::isStopMatched(uint16_t lowTimeCounter,uint16_t highTimecounter)
+uint8_t DYIRDaikinRecv::isStopMatched(uint16_t lowTimeCounter,uint16_t highTimecounter)
 {
 	if ((lowTimeCounter > 15 && lowTimeCounter < 50) && (highTimecounter > 200)) {
 		return 1;

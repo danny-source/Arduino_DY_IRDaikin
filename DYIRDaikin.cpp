@@ -10,7 +10,7 @@
  */
 
 
-#include <IRdaikin.h>
+#include <DYIRDaikin.h>
 
 
 //IR send
@@ -35,42 +35,42 @@ static byte vModeTable[] = { 0x6,0x3,0x2,0x4};
 //
 uint8_t	irReceiveData[25] = {0};
 
-IRDaikinSend irsend;
-IRDaikinRecv irrecv;
+DYIRDaikinSend irsend;
+DYIRDaikinRecv irrecv;
 
 //
-void IRdaikin::begin()
+void DYIRDaikin::begin()
 {
 	irsend.begin();
 }
 
-void IRdaikin::begin(int IRsendPin, uint8_t irRecvPin)
+void DYIRDaikin::begin(int IRsendPin, uint8_t irRecvPin)
 {
 	irsend.begin(IRsendPin);
  	irrecv.begin(irRecvPin,irReceiveData,25);
 }
-void IRdaikin::begin(int IRsendPin)
+void DYIRDaikin::begin(int IRsendPin)
 {
 	irsend.begin(IRsendPin);
 }
 
-void IRdaikin::decodePin(uint8_t irRecvPin)
+void DYIRDaikin::decodePin(uint8_t irRecvPin)
 {
  	irrecv.begin(irRecvPin,irReceiveData,25);
 }
 
 
-void IRdaikin::daikin_on()
+void DYIRDaikin::daikin_on()
 {
 	daikinController_on();
 }
 
-void IRdaikin::daikin_off()
+void DYIRDaikin::daikin_off()
 {
 	daikinController_off();
 }
 
-void IRdaikin::daikin_setPower(uint8_t state)
+void DYIRDaikin::daikin_setPower(uint8_t state)
 {
 	if (state == 1) {
 		daikinController_on();
@@ -79,24 +79,24 @@ void IRdaikin::daikin_setPower(uint8_t state)
 	}
 }
 
-uint8_t IRdaikin::daikin_getPower()
+uint8_t DYIRDaikin::daikin_getPower()
 {
 	return (daikin[13] & 0x01);
 }
 
-void IRdaikin::daikin_setSwing_on()
+void DYIRDaikin::daikin_setSwing_on()
 {
 	daikin[16] |=0x0f;
 	daikinController_checksum();
 }
 
-void IRdaikin::daikin_setSwing_off()
+void DYIRDaikin::daikin_setSwing_off()
 {
 	daikin[16] &=0xf0;
 	daikinController_checksum();
 }
 
-void IRdaikin::daikin_setSwing(uint8_t state)
+void DYIRDaikin::daikin_setSwing(uint8_t state)
 {
 	if (state == 1) {
 		daikin_setSwing_on();
@@ -105,7 +105,7 @@ void IRdaikin::daikin_setSwing(uint8_t state)
 	}
 }
 
-uint8_t IRdaikin::daikin_getSwingState()
+uint8_t DYIRDaikin::daikin_getSwingState()
 {
 	uint8_t state = daikin[16] & 0x0f;
 	if (state == 0x0f) {
@@ -114,7 +114,7 @@ uint8_t IRdaikin::daikin_getSwingState()
 	return 0;
 }
 
-void IRdaikin::daikin_setMode(uint8_t mode)
+void DYIRDaikin::daikin_setMode(uint8_t mode)
 {
 	if (mode>=0 && mode <=3)
 	{
@@ -122,7 +122,7 @@ void IRdaikin::daikin_setMode(uint8_t mode)
 	}
 }
 
-uint8_t IRdaikin::daikin_getMode()
+uint8_t DYIRDaikin::daikin_getMode()
 {
 	uint8_t mode = (daikin[13] & B01110000) >> 4;
 	if (mode == 0x6) mode = 0;
@@ -132,7 +132,7 @@ uint8_t IRdaikin::daikin_getMode()
 }
 
 // 0~4 speed,5 auto,6 moon
-void IRdaikin::daikin_setFan(uint8_t speed)
+void DYIRDaikin::daikin_setFan(uint8_t speed)
 {
 	if (speed>=0 && speed <=6)
 	{
@@ -140,7 +140,7 @@ void IRdaikin::daikin_setFan(uint8_t speed)
 	}
 }
 
-uint8_t IRdaikin::daikin_getFan()
+uint8_t DYIRDaikin::daikin_getFan()
 {
 	uint8_t fan = (daikin[16] & 0xf0);
 	if (fan == 0x30) fan = 0;
@@ -153,7 +153,7 @@ uint8_t IRdaikin::daikin_getFan()
 	return fan;
 }
 
-void IRdaikin::daikin_setTemp(uint8_t temp)
+void DYIRDaikin::daikin_setTemp(uint8_t temp)
 {
 	if (temp >= 18 && temp<=32)
 	{
@@ -162,18 +162,18 @@ void IRdaikin::daikin_setTemp(uint8_t temp)
 	}
 }
 
-uint8_t IRdaikin::daikin_getTemp()
+uint8_t DYIRDaikin::daikin_getTemp()
 {
 	uint8_t temperature= (daikin[14] & B01111110) >> 1;
 	return temperature;
 }
 
-void IRdaikin::daikin_sendCommand()
+void DYIRDaikin::daikin_sendCommand()
 {
 		sendDaikinCommand();
 }
 //
-void IRdaikin::dump()
+void DYIRDaikin::dump()
 {
 	uint8_t i;
 	for (i=0; i <COMMAND_LENGTH; i++) {
@@ -182,7 +182,7 @@ void IRdaikin::dump()
 	}
 }
 
-void IRdaikin::description()
+void DYIRDaikin::description()
 {
 	Serial.print(F("\r\n==send buffer==\r\n"));
 	Serial.print(F("Power:"));
@@ -203,7 +203,7 @@ void IRdaikin::description()
 }
 
 //private function
-uint8_t IRdaikin::daikinController_checksum()
+uint8_t DYIRDaikin::daikinController_checksum()
 {
 	uint8_t sum = 0;
 	uint8_t i;
@@ -225,44 +225,44 @@ uint8_t IRdaikin::daikinController_checksum()
 
 }
 
-void IRdaikin::daikinController_on()
+void DYIRDaikin::daikinController_on()
 {
 	daikin[13] |= 0x01;
 	daikinController_checksum();
 }
 
-void IRdaikin::daikinController_off()
+void DYIRDaikin::daikinController_off()
 {
 	daikin[13] &= 0xFE;
 	daikinController_checksum();
 }
 
-void IRdaikin::daikinController_setTemp(uint8_t temp)
+void DYIRDaikin::daikinController_setTemp(uint8_t temp)
 {
 	daikin[14] = (temp)*2;
 	daikinController_checksum();
 }
 
 
-void IRdaikin::daikinController_setFan(uint8_t fan)
+void DYIRDaikin::daikinController_setFan(uint8_t fan)
 {
 	daikin[16] &= 0x0f;
 	daikin[16] |= fan;
 	daikinController_checksum();
 }
 
-uint8_t IRdaikin::daikinController_getState()
+uint8_t DYIRDaikin::daikinController_getState()
 {
 	return (daikin[13])&0x01;
 }
 
-void IRdaikin::daikinController_setMode(uint8_t mode)
+void DYIRDaikin::daikinController_setMode(uint8_t mode)
 {
 	daikin[13]=mode<<4 | daikinController_getState();
 	daikinController_checksum();
 }
 
-void IRdaikin::sendDaikinCommand()
+void DYIRDaikin::sendDaikinCommand()
 {
 	  //~ irsend.sendDaikinWake();
       //~ delay(20);
@@ -275,7 +275,7 @@ void IRdaikin::sendDaikinCommand()
       irsend.sendDaikin(daikin, 19,8);
 }
 
-uint8_t IRdaikin::decode() {
+uint8_t DYIRDaikin::decode() {
 	if (irrecv.decode()>10) {
 		receivedIRUpdateToSendBuffer(irReceiveData);
 		return 1;
@@ -283,7 +283,7 @@ uint8_t IRdaikin::decode() {
 	return 0;
 }
 //
-void IRdaikin::receivedIRUpdateToSendBuffer(uint8_t *recvData) {
+void DYIRDaikin::receivedIRUpdateToSendBuffer(uint8_t *recvData) {
 	//decode all state
 	//~ static byte vFanTable[] = { 0x30,0x40,0x50,0x60,0x70,0xa0,0xb0};
 	uint8_t temperature= (recvData[6] & B01111110) >> 1;

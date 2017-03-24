@@ -9,10 +9,10 @@
  * decode ir
  */
 
-#include <IRdaikin.h>
+#include <DYIRDaikin.h>
 
 
-IRdaikin irdaikin;
+DYIRDaikin irdaikin;
 void setup()
 {
 	Serial.begin(115200);

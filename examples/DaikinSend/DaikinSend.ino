@@ -5,10 +5,10 @@
  * https://github.com/danny-source/Arduino_IRremote_Daikin
  */
 
-#include <IRremoteDaikinSend.h>
+#include <DYIRDaikinSend.h>
 
 
-IRDaikinSend daikinSend;
+DYIRDaikinSend daikinSend;
 int isOn;
 
 void setup()

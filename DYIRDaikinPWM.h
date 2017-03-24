@@ -9,8 +9,8 @@
  *
  */
 
-#ifndef IRremoteintDaikin_h
-#define IRremoteintDaikin_h
+#ifndef DYIRDaikinPWM_h
+#define DYIRDaikinPWM_h
 
 // define which timer to use
 //

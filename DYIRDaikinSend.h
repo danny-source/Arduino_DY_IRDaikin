@@ -9,17 +9,17 @@
  *
  */
 
-#ifndef IRremoteDaikinSend_h
-#define IRremoteDaikinSend_h
-#include "IRdaikinDef.h"
+#ifndef DYIRDaikinSend_h
+#define DYIRDaikinSend_h
+#include "DYIRDaikinDef.h"
 
 // Only used for testing; can remove virtual for shorter code
 //#define VIRTUAL
 
-class IRDaikinSend
+class DYIRDaikinSend
 {
 public:
-  IRDaikinSend() {}
+  DYIRDaikinSend() {}
   void begin();
   void begin(int IRsendPin);
   void sendRaw(unsigned int buf[], int len, int hz);

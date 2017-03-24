@@ -9,12 +9,12 @@
  *
  */
 
-#ifndef IRdaikin_h
-#define IRdaikin_h
-#include <IRremoteDaikinSend.h>
-#include <IRremoteDaikinRecv.h>
+#ifndef DYIRDaikin_h
+#define DYIRDaikin_h
+#include <DYIRDaikinSend.h>
+#include <DYIRDaikinRecv.h>
 
-class IRdaikin
+class DYIRDaikin
 {
 public:
 	void begin();

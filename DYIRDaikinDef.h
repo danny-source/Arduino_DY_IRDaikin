@@ -1,6 +1,6 @@
 
-#ifndef IRdaikinDef_h
-#define IRdaikinDef_h
+#ifndef DYIRDaikinDef_h
+#define DYIRDaikinDef_h
 
 #if defined(ARDUINO) && ARDUINO >= 100
 #include <Arduino.h>
@@ -9,7 +9,7 @@
 #endif
 
 #if (!(defined(ARDUINO_ARCH_AMEBA)|defined(ESP8266)))
-#include <IRremoteIntDaikin.h>
+#include <DYIRDaikinPWM.h>
 #include <avr/interrupt.h>
 #endif
 

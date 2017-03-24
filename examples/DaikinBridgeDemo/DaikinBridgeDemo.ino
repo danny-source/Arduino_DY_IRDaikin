@@ -9,10 +9,10 @@
  * bridge receive and send ir
  */
 
-#include <IRdaikin.h>
+#include <DYIRDaikin.h>
 
 
-IRdaikin irdaikin;
+DYIRDaikin irdaikin;
 int isOn;
 
 void setup()

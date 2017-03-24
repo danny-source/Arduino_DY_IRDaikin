@@ -9,9 +9,9 @@
  *
  */
 
-#ifndef IRdaikinBRC_h
-#define IRdaikinBRC_h
-#include <IRremoteDaikinSend.h>
+#ifndef DYIRDaikinBRC_h
+#define DYIRDaikinBRC_h
+#include <DYIRDaikinSend.h>
 
 class IRdaikinBRC
 {

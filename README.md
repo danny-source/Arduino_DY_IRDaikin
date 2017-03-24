@@ -1,16 +1,18 @@
 
-## IRdaikin ARC/BRC
+## Arduino_DY_IRDaikin ARC/BRC
 
- IRdaikin ARC/BRC
+ Arduino_DY_IRDaikin ARC/BRC
 
 
  Start:Sep, 2014
 
  Copyright 2017 danny
 
- IRdaikin ARC/BRC library base from Ken Shirriff's IRremote library.
+ Orignal name is Arduino_IRremote_Daikin, change to this name now.
 
- IRdaikin ARC/BRC is simply to send ir command to control daikin air conditioning ARC/BRC.
+ Arduino_DY_IRDaikin ARC/BRC library base from Ken Shirriff's IRremote library.
+
+ Arduino_DY_IRDaikin ARC/BRC is simply to send ir command to control daikin air conditioning ARC/BRC.
 
  ![](https://raw.githubusercontent.com/danny-source/Arduino_IRremote_Daikin/master/Arduino_UNO_IR_Transmit.png)
 

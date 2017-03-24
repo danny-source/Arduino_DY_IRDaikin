@@ -5,9 +5,9 @@
 #######################################
 # Datatypes (KEYWORD1)
 #######################################
-IRdaikin KEYWORD1 IRdaikin
-IRdaikinBRC KEYWORD1 IRdaikinBRC
-IRDaikinSend KEYWORD1 IRDaikinSend
+DYIRDaikin KEYWORD1 DYIRDaikin
+DYIRDaikinBRC KEYWORD1 DYIRDaikinBRC
+DYIRDaikinSend KEYWORD1 DYIRDaikinSend
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################

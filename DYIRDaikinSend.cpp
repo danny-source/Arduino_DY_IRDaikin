@@ -9,7 +9,7 @@
  *
  */
 
-#include "IRremoteDaikinSend.h"
+#include "DYIRDaikinSend.h"
 #if (!(defined(ARDUINO_ARCH_AMEBA)|defined(ESP8266)))
 #include <util/delay.h>
 #else
@@ -20,13 +20,13 @@
 #define TIMER_PWM_PIN 3
 #endif
 
-void IRDaikinSend::begin()
+void DYIRDaikinSend::begin()
 {
     IRpin = -1;
 	enableIROut(38);
 }
 
-void IRDaikinSend::begin(int IRsendPin)
+void DYIRDaikinSend::begin(int IRsendPin)
 {
     IRpin = IRsendPin;
 	enableIROut(38);
@@ -35,7 +35,7 @@ void IRDaikinSend::begin(int IRsendPin)
 }
 
 
-void IRDaikinSend::sendDaikin(unsigned char buf[], int len, int start) {
+void DYIRDaikinSend::sendDaikin(unsigned char buf[], int len, int start) {
     int data2;
     enableIROut(38);
     mark(DAIKIN_HDR_MARK);
@@ -61,7 +61,7 @@ void IRDaikinSend::sendDaikin(unsigned char buf[], int len, int start) {
     space(DAIKIN_ZERO_SPACE);
 }
 
-void IRDaikinSend::sendDaikinWake() {
+void DYIRDaikinSend::sendDaikinWake() {
     enableIROut(38);
     space(DAIKIN_ZERO_MARK);
     //
@@ -81,7 +81,7 @@ void IRDaikinSend::sendDaikinWake() {
     space(DAIKIN_ZERO_MARK);
 }
 
-void IRDaikinSend::sendRaw(unsigned int buf[], int len, int hz)
+void DYIRDaikinSend::sendRaw(unsigned int buf[], int len, int hz)
 {
     enableIROut(hz);
     for (int i = 0; i < len; i++) {
@@ -96,7 +96,7 @@ void IRDaikinSend::sendRaw(unsigned int buf[], int len, int hz)
 }
 
 
-void IRDaikinSend::mark(int time) {
+void DYIRDaikinSend::mark(int time) {
     if (IRpin == -1) {
 		//Serial.println();
 		//Serial.println("PWM");
@@ -129,7 +129,7 @@ void IRDaikinSend::mark(int time) {
 }
 
 /* Leave pin off for time (given in microseconds) */
-void IRDaikinSend::space(int time) {
+void DYIRDaikinSend::space(int time) {
     if (IRpin == -1) {
         TIMER_DISABLE_PWM; // Disable pin 3 PWM output
         delayMicrosecondsEnhance(time);
@@ -143,7 +143,7 @@ void IRDaikinSend::space(int time) {
 
 //~ #endif
 
-void IRDaikinSend::enableIROut(int khz) {
+void DYIRDaikinSend::enableIROut(int khz) {
     if (IRpin == -1) {
         pinMode(TIMER_PWM_PIN, OUTPUT);
         TIMER_CONFIG_KHZ(khz);
@@ -152,7 +152,7 @@ void IRDaikinSend::enableIROut(int khz) {
     }
 }
 
-void IRDaikinSend::delayMicrosecondsEnhance(uint32_t usec)
+void DYIRDaikinSend::delayMicrosecondsEnhance(uint32_t usec)
 {
     if (usec > 100)
     {
@@ -171,7 +171,7 @@ void IRDaikinSend::delayMicrosecondsEnhance(uint32_t usec)
     }
 }
 
-void IRDaikinSend::delayMicrosecondsSys(uint32_t usec) {
+void DYIRDaikinSend::delayMicrosecondsSys(uint32_t usec) {
   while(usec--) {
     _delay_us(1);
 

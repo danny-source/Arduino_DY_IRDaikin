@@ -9,14 +9,14 @@
  *
  */
 
-#ifndef IRremoteDaikinRecv_h
-#define IRremoteDaikinRecv_h
-#include "IRdaikinDef.h"
+#ifndef DYIRDaikinRecv_h
+#define DYIRDaikinRecv_h
+#include "DYIRDaikinDef.h"
 
 // Only used for testing; can remove virtual for shorter code
 #define VIRTUAL
 
-class IRDaikinRecv
+class DYIRDaikinRecv
 {
 public:
 	//~ IRDaikinRecv() {}
