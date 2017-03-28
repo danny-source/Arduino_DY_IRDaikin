@@ -4,13 +4,16 @@
 void DYIRDaikinSend::begin()
 {
     IRpin = -1;
-	enableIROut(38);
+#if ((AVR_HARDWARE_PWM) || defined(DY_IRDAIKIN_SOFTIR))
+	IRpin = SOFTIR_PIN;
+#endif
+	enableIROut(DY_IRDAIKIN_FREQUENCY);
 }
 
 void DYIRDaikinSend::begin(int IRsendPin)
 {
     IRpin = IRsendPin;
-	enableIROut(38);
+	enableIROut(DY_IRDAIKIN_FREQUENCY);
     pinMode(IRpin, OUTPUT);
     digitalWrite(IRpin, LOW); // When not sending PWM, we want it low
 }
@@ -18,7 +21,7 @@ void DYIRDaikinSend::begin(int IRsendPin)
 
 void DYIRDaikinSend::sendDaikin(unsigned char buf[], int len, int start) {
     int data2;
-    enableIROut(38);
+    enableIROut(DY_IRDAIKIN_FREQUENCY);
     mark(DAIKIN_HDR_MARK);
     space(DAIKIN_HDR_SPACE);
 
@@ -92,17 +95,19 @@ void DYIRDaikinSend::mark(int time) {
         unsigned long endTime = (unsigned long)time;
         while (micros() - beginTime < endTime) {
             digitalWrite(IRpin, HIGH);
-            #if(defined(ARDUINO_ARCH_AMEBA)|defined(ESP8266))
-            delayMicrosecondsEnhance(halfPeriodicTime);
-            #else
-            delayMicrosecondsEnhance(halfPeriodicTime - 6);
+            #if (AVR_HARDWARE_PWM & defined(DY_IRDAIKIN_SOFTIR))
+				delayMicrosecondsEnhance(halfPeriodicTime - 6);
+			#else
+				delayMicrosecondsEnhance(halfPeriodicTime);
+				#warning "Use soft IR to Simulate!1"
             #endif
-            digitalWrite(IRpin, LOW);
+				digitalWrite(IRpin, LOW);
             // 38 kHz -> T = 26.31 microsec (periodic time), half of it is 13
-            #if(defined(ARDUINO_ARCH_AMEBA)|defined(ESP8266))
-            delayMicrosecondsEnhance(halfPeriodicTime);
+            #if (AVR_HARDWARE_PWM & defined(DY_IRDAIKIN_SOFTIR))
+				delayMicrosecondsEnhance(halfPeriodicTime - 10);
             #else
-            delayMicrosecondsEnhance(halfPeriodicTime - 10);
+				delayMicrosecondsEnhance(halfPeriodicTime);
+				#warning "Use soft IR to Simulate!0"
             #endif
         }
         interrupts();

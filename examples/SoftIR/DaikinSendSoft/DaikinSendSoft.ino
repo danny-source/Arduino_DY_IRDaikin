@@ -8,7 +8,7 @@ int isOn;
 void setup()
 {
 	Serial.begin(115200);
-	daikinSend.begin();
+	daikinSend.begin(2);
 	delay(1000);
 	Serial.println();
 	Serial.println("Start");

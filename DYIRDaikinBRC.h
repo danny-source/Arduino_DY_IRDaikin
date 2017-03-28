@@ -9,19 +9,19 @@ public:
     //void IRdaikin();
     void begin();
     void begin(int IRsendPin);
-    void daikin_on();
-    void daikin_off();
-    void daikin_setSwing_on();
-    void daikin_setSwing_off();
-    void daikin_setMode(int mode);//
-    void daikin_setFan(int speed);// 0~1 Hi,Low
-    void daikin_setTemp(uint8_t temp);//22 ~ 33
-    void daikin_sendCommand();
+    void on();
+    void off();
+    void setSwing_on();
+    void setSwing_off();
+    void setMode(int mode);//
+    void setFan(int speed);// 0~1 Hi,Low
+    void setTemp(uint8_t temp);//22 ~ 33
+    void sendCommand();
     void dump();
-
+    uint8_t getPower();
 private:
 
-    DYIRDaikinSend irsend1;
+    DYIRDaikinSend _irsend;
 // # of bytes per command
 
     unsigned char daikinBRC[DYIRDAIKINBRC_COMMAND_LENGTH]     = {
@@ -39,14 +39,8 @@ private:
 //22,23,24,25,26,27,28,29,30,31,32,33,34,35,36
     byte vTempTableBRC[16] = {26,28,30,32,34,36,38,40,
                               42,44,46,48,50,52,54                             };
-    void daikinController_on();
-    void daikinController_off();
-    void daikinController_setTemp(uint8_t temp);
-    void daikinController_setFan(uint8_t fan);
-    void daikinController_setMode(uint8_t mode);
-    void sendDaikinCommand();
-    uint8_t daikinController_checksum();
-    uint8_t daikinController_getState();
+    uint8_t checksum();
+;
 };
 
 #endif

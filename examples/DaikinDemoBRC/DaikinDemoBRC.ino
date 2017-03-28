@@ -1,12 +1,4 @@
 
-/*
- *
- *
- * Version 0.0.1 Aug, 2014
- * Copyright 2014 danny
- * https://github.com/danny-source/Arduino_IRremote_Daikin
- */
-
 #include <DYIRDaikinBRC.h>
 
 
@@ -17,11 +9,11 @@ void setup()
 {
     Serial.begin(115200);
     irdaikin.begin();
-    irdaikin.daikin_on();
-    irdaikin.daikin_setFan(0);
-    irdaikin.daikin_setTemp(25);
+    irdaikin.on();
+    irdaikin.setFan(0);
+    irdaikin.setTemp(25);
 //----everything is ok and to execute send command-----
-    irdaikin.daikin_sendCommand();
+    irdaikin.sendCommand();
     isOn = 0;
 }
 
@@ -31,16 +23,16 @@ void loop() {
         if (Serial.read() == '\n') {
             if (isOn == 0) {
                 isOn = 1;
-                irdaikin.daikin_off();
+                irdaikin.off();
                 Serial.println("Turn Off");
             } else {
                 isOn = 0;
-                irdaikin.daikin_on();
-                irdaikin.daikin_setFan(1);
-                irdaikin.daikin_setTemp(22);
+                irdaikin.on();
+                irdaikin.setFan(1);
+                irdaikin.setTemp(22);
                 Serial.println("Turn On");
             }
-            irdaikin.daikin_sendCommand();
+            irdaikin.sendCommand();
             Serial.println("Execute Command!");
         }
     }

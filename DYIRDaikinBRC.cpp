@@ -13,73 +13,83 @@
 
 void DYIRDaikinBRC::begin()
 {
-    irsend1.begin();
+    _irsend.begin();
 }
 void DYIRDaikinBRC::begin(int IRsendPin)
 {
-    irsend1.begin(IRsendPin);
+    _irsend.begin(IRsendPin);
 }
 
-void DYIRDaikinBRC::daikin_on()
+void DYIRDaikinBRC::on()
 {
-    daikinController_on();
+    daikinBRC[14] |= 0x01;
+    checksum();
 }
 
-void DYIRDaikinBRC::daikin_off()
+void DYIRDaikinBRC::off()
 {
-    daikinController_off();
+    daikinBRC[14] &= 0xFE;
+    checksum();
 }
 
-void DYIRDaikinBRC::daikin_setSwing_on()
+void DYIRDaikinBRC::setSwing_on()
 {
     daikinBRC[18] &=0xfc;
     daikinBRC[18] |=0x01;
-    daikinController_checksum();
+    checksum();
 }
 
-void DYIRDaikinBRC::daikin_setSwing_off()
+void DYIRDaikinBRC::setSwing_off()
 {
     daikinBRC[18] &=0xfc;
     daikinBRC[18] |=0x02;
-    daikinController_checksum();
+    checksum();
 }
 
-void DYIRDaikinBRC::daikin_setMode(int mode)
+void DYIRDaikinBRC::setMode(int mode)
 {
     if (mode>=0 && mode <=2)
     {
-        daikinController_setMode(mode);
+		daikinBRC[12] &=0x8f;
+		daikinBRC[12] |=vModeTableBRC12[mode];
+		daikinBRC[14] &=0x8f;
+		daikinBRC[14] |=vModeTableBRC14[mode];
+		checksum();
     }
 }
 
 // 0~4 speed,5 auto,6 moon
-void DYIRDaikinBRC::daikin_setFan(int speed)
+void DYIRDaikinBRC::setFan(int speed)
 {
+	uint8_t fan = vFanTableBRC[speed];
     if (speed>=0 && speed <=1)
     {
-        daikinController_setFan(vFanTableBRC[speed]);
+		daikinBRC[18] &= 0xdf;
+		daikinBRC[18] |= fan;
+		checksum();
     }
 }
 
-void DYIRDaikinBRC::daikin_setTemp(uint8_t temp)
+void DYIRDaikinBRC::setTemp(uint8_t temp)
 {
     if (temp >= 18 && temp<=36)
     {
-        //temp = temp-22;
-        //daikinBRC[17] = vTempTableBRC[temp];
         temp = temp - 9;
         temp = temp << 1;
         daikinBRC[17] = temp;
-        daikinController_checksum();
+        checksum();
     }
 }
 
-void DYIRDaikinBRC::daikin_sendCommand()
+void DYIRDaikinBRC::sendCommand()
 {
-    sendDaikinCommand();
+    checksum();
+    _irsend.sendDaikin(daikinBRC, 7,0);
+    delay(29);
+    _irsend.sendDaikin(daikinBRC, 15,7);
 }
 //
-uint8_t DYIRDaikinBRC::daikinController_checksum()
+uint8_t DYIRDaikinBRC::checksum()
 {
     uint8_t sum = 0;
     uint8_t i;
@@ -110,65 +120,9 @@ void DYIRDaikinBRC::dump()
     }
 }
 
-
-//private function
-
-void DYIRDaikinBRC::daikinController_on()
+uint8_t DYIRDaikinBRC::getPower()
 {
-    daikinBRC[14] |= 0x01;
-    daikinController_checksum();
+    return (daikinBRC[14])&0x01;
 }
 
-void DYIRDaikinBRC::daikinController_off()
-{
-    daikinBRC[14] &= 0xFE;
-    daikinController_checksum();
-}
-
-void DYIRDaikinBRC::daikinController_setTemp(uint8_t temp)
-{
-    uint8_t t;
-    uint8_t compare1;
-    uint8_t compare2;
-    t=0;
-    compare1 = B10000000;
-
-    if (temp >= 22 && temp<=36)
-    {
-        temp = temp -22;
-        daikinBRC[17] = vTempTableBRC[temp];
-        daikinController_checksum();
-    }
-}
-
-
-void DYIRDaikinBRC::daikinController_setFan(uint8_t fan)
-{
-    daikinBRC[18] &= 0xdf;
-    daikinBRC[18] |= fan;
-    //Serial.println(daikinBRC[18],HEX);
-    daikinController_checksum();
-}
-
-uint8_t DYIRDaikinBRC::daikinController_getState()
-{
-    return (daikinBRC[13])&0x01;
-}
-
-void DYIRDaikinBRC::daikinController_setMode(uint8_t mode)
-{
-    daikinBRC[12] &=0x8f;
-    daikinBRC[12] |=vModeTableBRC12[mode];
-    daikinBRC[14] &=0x8f;
-    daikinBRC[14] |=vModeTableBRC14[mode];
-    daikinController_checksum();
-}
-
-void DYIRDaikinBRC::sendDaikinCommand()
-{
-    daikinController_checksum();
-    irsend1.sendDaikin(daikinBRC, 7,0);
-    delay(29);
-    irsend1.sendDaikin(daikinBRC, 15,7);
-}
 

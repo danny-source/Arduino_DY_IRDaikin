@@ -1,12 +1,4 @@
 
-/*
- *
- *
- * Version 0.0.1 Aug, 2014
- * Copyright 2014 danny
- * https://github.com/danny-source/Arduino_IRremote_Daikin
- */
-
 #include <DYIRDaikin.h>
 
 
