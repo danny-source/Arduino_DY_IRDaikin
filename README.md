@@ -14,7 +14,12 @@
 
  Arduino_DY_IRDaikin ARC/BRC is simply to send ir command to control daikin air conditioning ARC/BRC.
 
+### Arduino UNO
  ![](https://raw.githubusercontent.com/danny-source/Arduino_IRremote_Daikin/master/Arduino_UNO_IR_Transmit.png)
+
+### Ameba Arduino
+
+ ![](https://raw.githubusercontent.com/danny-source/Arduino_IRremote_Daikin/master/Arduino_Ameba_IR_Transmit.png)
 
 ## Changelog:
 
