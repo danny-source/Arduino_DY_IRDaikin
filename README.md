@@ -23,6 +23,8 @@
 
 ## Changelog:
 
+1.1.1 fix soft ir frequency and wave width problem
+
 1.1.0  change class and function name,support STM32Duino/Arduino ESP8266/Ameba and  Arduino PWM IR Signal,Arduino UNO/Nano/mega 2560 support SOFT IR
 
 1.0.2  Support ESP8266/Ameba Soft and Arduino PWM IR Signal
