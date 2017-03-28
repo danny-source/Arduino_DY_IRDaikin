@@ -95,19 +95,25 @@ void DYIRDaikinSend::mark(int time) {
         unsigned long endTime = (unsigned long)time;
         while (micros() - beginTime < endTime) {
             digitalWrite(IRpin, HIGH);
-            #if (AVR_HARDWARE_PWM & defined(DY_IRDAIKIN_SOFTIR))
-				delayMicrosecondsEnhance(halfPeriodicTime - 6);
+            #if (AVR_HARDWARE_PWM || defined(DY_IRDAIKIN_SOFTIR))
+				#if (defined(__AVR_ATmega2560__))
+					delayMicrosecondsSys(halfPeriodicTime - 10 );
+				#else
+					delayMicrosecondsSys(halfPeriodicTime - 9 );
+				#endif
 			#else
 				delayMicrosecondsEnhance(halfPeriodicTime);
-				#warning "Use soft IR to Simulate!1"
             #endif
 				digitalWrite(IRpin, LOW);
             // 38 kHz -> T = 26.31 microsec (periodic time), half of it is 13
-            #if (AVR_HARDWARE_PWM & defined(DY_IRDAIKIN_SOFTIR))
-				delayMicrosecondsEnhance(halfPeriodicTime - 10);
+            #if (AVR_HARDWARE_PWM || defined(DY_IRDAIKIN_SOFTIR))
+				#if (defined(__AVR_ATmega2560__))
+					delayMicrosecondsSys(halfPeriodicTime - 11 );
+				#else
+					delayMicrosecondsSys(halfPeriodicTime - 9 );
+				#endif;
             #else
 				delayMicrosecondsEnhance(halfPeriodicTime);
-				#warning "Use soft IR to Simulate!0"
             #endif
         }
         interrupts();

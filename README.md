@@ -18,6 +18,8 @@
 
 ## Changelog:
 
+1.1.0  change class and function name,support STM32Duino/Arduino ESP8266/Ameba and  Arduino PWM IR Signal,Arduino UNO/Nano/mega 2560 support SOFT IR
+
 1.0.2  Support ESP8266/Ameba Soft and Arduino PWM IR Signal
 
 1.0.1  Support ESP8266 Soft and Arduino PWM IR Signal
@@ -42,6 +44,8 @@
 
 ## SOFT Pinout
 
+Default is pin 3 when you use `begin()`.Remeber! SOFT IR must assign pin by `begin(int irSendPin)`
+
 ### ESP8266
   - pin 4:GPIO4
   - pin 5:GPIO5
@@ -60,32 +64,37 @@
   - pin 2:D2
   - pin 5:D5
 
+### STM32F1/F3/F4
+
+  - pin 2:PA2
+  - pin 3:PA3
+
 ## Setting function Daikin ARC:
 
-- daikin_on();//turn on AC
-- daikin_off();//turn off AC
-- daikin_setSwing_on();//turn on swing
-- daikin_setSwing_off();//turn off swing
-- daikin_setMode(int mode);//0=FAN, 1=COOL, 2=DRY, 3=HEAT(if you have one)
-- daikin_setFan(int speed);// 0~4=speed(1,2,3,4,5),5=auto,6=moon
-- daikin_setTemp(int temp);//18 ~ 32 Celsius,if you using Fahrenheit ,maybe to enter Fahrenheit.
-- daikin_sendCommand();
+- on();//turn on AC
+- off();//turn off AC
+- setSwing_on();//turn on swing
+- setSwing_off();//turn off swing
+- setMode(int mode);//0=FAN, 1=COOL, 2=DRY, 3=HEAT(if you have one)
+- setFan(int speed);// 0~4=speed(1,2,3,4,5),5=auto,6=moon
+- setTemp(int temp);//18 ~ 32 Celsius,if you using Fahrenheit ,maybe to enter Fahrenheit.
+- sendCommand();
 - decode();//decode ir
 - description();//print switch state
 
 ## Setting function Daikin BRC:
 
-- daikin_on();//turn on AC
-- daikin_off();//turn off AC
-- daikin_setSwing_on();//turn on swing
-- daikin_setSwing_off();//turn off swing
-- daikin_setFan(int speed);// 0.Low 1.High
-- daikin_setTemp(int temp);//18 ~ 36 Celsius,if you using Fahrenheit ,maybe to enter Fahrenheit.
-- daikin_sendCommand();
+- on();//turn on AC
+- off();//turn off AC
+- setSwing_on();//turn on swing
+- setSwing_off();//turn off swing
+- setFan(int speed);// 0.Low 1.High
+- setTemp(int temp);//18 ~ 36 Celsius,if you using Fahrenheit ,maybe to enter Fahrenheit.
+- sendCommand();
 
  ## Execute function:
 
-- daikin_sendCommand();
+- sendCommand();
 
   You must initial setting by your programming and,
   After Setting execute daikin_sendCommand()
@@ -94,14 +103,14 @@
 
 ```
  begin();
- daikin_on();
- daikin_setSwing_off();
- daikin_setMode(1)
- daikin_setFan(4);//FAN speed to MAX
- daikin_setTemp(25);
+ on();
+ setSwing_off();
+ setMode(1)
+ setFan(4);//FAN speed to MAX
+ setTemp(25);
  //----everything is ok and to execute send command-----
  description();
- daikin_sendCommand();
+ sendCommand();
 ```
 
 ## Thanks

@@ -22,6 +22,7 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 #warning "Use PWM IR to Send!"
+#define SOFTIR_PIN 3
 #else
 #define _delay_us delayMicroseconds
 #define TIMER_ENABLE_PWM
