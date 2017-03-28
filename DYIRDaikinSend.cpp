@@ -90,33 +90,18 @@ void DYIRDaikinSend::mark(int time) {
 		//Serial.println();
 		//Serial.print("SOFT:");
 		//Serial.println(halfPeriodicTime);
-		noInterrupts();
+		//noInterrupts();
         unsigned long beginTime = micros();
         unsigned long endTime = (unsigned long)time;
-        while (micros() - beginTime < endTime) {
+        unsigned long nowTime = micros();
+        while (nowTime - beginTime < endTime) {
             digitalWrite(IRpin, HIGH);
-            #if (AVR_HARDWARE_PWM || defined(DY_IRDAIKIN_SOFTIR))
-				#if (defined(__AVR_ATmega2560__))
-					delayMicrosecondsSys(halfPeriodicTime - 10 );
-				#else
-					delayMicrosecondsSys(halfPeriodicTime - 9 );
-				#endif
-			#else
-				delayMicrosecondsEnhance(halfPeriodicTime);
-            #endif
-				digitalWrite(IRpin, LOW);
-            // 38 kHz -> T = 26.31 microsec (periodic time), half of it is 13
-            #if (AVR_HARDWARE_PWM || defined(DY_IRDAIKIN_SOFTIR))
-				#if (defined(__AVR_ATmega2560__))
-					delayMicrosecondsSys(halfPeriodicTime - 11 );
-				#else
-					delayMicrosecondsSys(halfPeriodicTime - 9 );
-				#endif;
-            #else
-				delayMicrosecondsEnhance(halfPeriodicTime);
-            #endif
+			delayMicrosecondsEnhance(halfPeriodicTimeHigh);
+			digitalWrite(IRpin, LOW);
+			delayMicrosecondsEnhance(halfPeriodicTimeLow);
+            nowTime = micros();
         }
-        interrupts();
+        //interrupts();
     }
 }
 
@@ -140,7 +125,27 @@ void DYIRDaikinSend::enableIROut(int khz) {
         pinMode(TIMER_PWM_PIN, OUTPUT);
         TIMER_CONFIG_KHZ(khz);
     } else {
-        halfPeriodicTime = (500/khz); // T = 1/f but we need T/2 in microsecond and f is in kHz
+        int halfPeriodicTime = (500/khz); // T = 1/f but we need T/2 in microsecond and f is in kHz
+            #if (AVR_HARDWARE_PWM || defined(DY_IRDAIKIN_SOFTIR))
+				#if (defined(__AVR_ATmega2560__))
+					halfPeriodicTimeHigh = halfPeriodicTime - 10;
+				#else
+					halfPeriodicTimeHigh = halfPeriodicTime - 9;
+				#endif
+			#else
+				halfPeriodicTimeHigh = halfPeriodicTime - 5;
+            #endif
+				digitalWrite(IRpin, LOW);
+            // 38 kHz -> T = 26.31 microsec (periodic time), half of it is 13
+            #if (AVR_HARDWARE_PWM || defined(DY_IRDAIKIN_SOFTIR))
+				#if (defined(__AVR_ATmega2560__))
+					halfPeriodicTimeLow = halfPeriodicTime - 11;
+				#else
+					halfPeriodicTimeLow = halfPeriodicTime - 9;
+				#endif;
+            #else
+				halfPeriodicTimeLow = halfPeriodicTime + 5;
+            #endif
     }
 }
 

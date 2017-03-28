@@ -20,7 +20,8 @@ public:
     void delayMicrosecondsEnhance(uint32_t usec);
 private:
     void delayMicrosecondsSys(uint32_t usec);
-    int halfPeriodicTime;
+    int halfPeriodicTimeHigh;
+    int halfPeriodicTimeLow;
     int IRpin;
 };
 
