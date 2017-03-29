@@ -5,15 +5,15 @@ void DYIRDaikinSend::begin()
 {
     IRpin = -1;
 #if ((AVR_HARDWARE_PWM) || defined(DY_IRDAIKIN_SOFTIR))
-	IRpin = SOFTIR_PIN;
+    IRpin = SOFTIR_PIN;
 #endif
-	enableIROut(DY_IRDAIKIN_FREQUENCY);
+    enableIROut(DY_IRDAIKIN_FREQUENCY);
 }
 
 void DYIRDaikinSend::begin(int IRsendPin)
 {
     IRpin = IRsendPin;
-	enableIROut(DY_IRDAIKIN_FREQUENCY);
+    enableIROut(DY_IRDAIKIN_FREQUENCY);
     pinMode(IRpin, OUTPUT);
     digitalWrite(IRpin, LOW); // When not sending PWM, we want it low
 }
@@ -82,26 +82,30 @@ void DYIRDaikinSend::sendRaw(unsigned int buf[], int len, int hz)
 
 void DYIRDaikinSend::mark(int time) {
     if (IRpin == -1) {
-		//Serial.println();
-		//Serial.println("PWM");
+        //Serial.println();
+        //Serial.println("PWM");
         TIMER_ENABLE_PWM; // Enable pin 3 PWM output
         delayMicrosecondsEnhance(time);
     } else {
-		//Serial.println();
-		//Serial.print("SOFT:");
-		//Serial.println(halfPeriodicTime);
-		//noInterrupts();
+        //Serial.println();
+        //Serial.print("SOFT:");
+        //Serial.println(halfPeriodicTime);
+#if (defined(__STM32F1__) || defined(STM32F3) || defined(STM32F4) || AVR_HARDWARE_PWM)
+        noInterrupts();
+#endif
         unsigned long beginTime = micros();
         unsigned long endTime = (unsigned long)time;
         unsigned long nowTime = micros();
         while (nowTime - beginTime < endTime) {
             digitalWrite(IRpin, HIGH);
-			delayMicrosecondsEnhance(halfPeriodicTimeHigh);
-			digitalWrite(IRpin, LOW);
-			delayMicrosecondsEnhance(halfPeriodicTimeLow);
+            delayMicrosecondsEnhance(halfPeriodicTimeHigh);
+            digitalWrite(IRpin, LOW);
+            delayMicrosecondsEnhance(halfPeriodicTimeLow);
             nowTime = micros();
         }
-        //interrupts();
+#if (defined(__STM32F1__) || defined(STM32F3) || defined(STM32F4) || AVR_HARDWARE_PWM)
+        interrupts();
+#endif
     }
 }
 
@@ -126,31 +130,45 @@ void DYIRDaikinSend::enableIROut(int khz) {
         TIMER_CONFIG_KHZ(khz);
     } else {
         int halfPeriodicTime = (500/khz); // T = 1/f but we need T/2 in microsecond and f is in kHz
-            #if (AVR_HARDWARE_PWM || defined(DY_IRDAIKIN_SOFTIR))
-				#if (defined(__AVR_ATmega2560__))
-					halfPeriodicTimeHigh = halfPeriodicTime - 10;
-				#else
-					halfPeriodicTimeHigh = halfPeriodicTime - 9;
-				#endif
-			#else
-				halfPeriodicTimeHigh = halfPeriodicTime - 5;
-            #endif
-				digitalWrite(IRpin, LOW);
-            // 38 kHz -> T = 26.31 microsec (periodic time), half of it is 13
-            #if (AVR_HARDWARE_PWM || defined(DY_IRDAIKIN_SOFTIR))
-				#if (defined(__AVR_ATmega2560__))
-					halfPeriodicTimeLow = halfPeriodicTime - 11;
-				#else
-					halfPeriodicTimeLow = halfPeriodicTime - 9;
-				#endif;
-            #else
-				halfPeriodicTimeLow = halfPeriodicTime + 5;
-            #endif
+        int periodicTime = (1000/khz);
+#if (AVR_HARDWARE_PWM || defined(DY_IRDAIKIN_SOFTIR))
+#if (defined(__AVR_ATmega2560__))
+        halfPeriodicTimeHigh = 4;
+#elif (defined(__AVR_ATmega32U4__))
+		halfPeriodicTimeHigh = 7;
+#else
+        halfPeriodicTimeHigh = 8;
+#endif
+#else
+        halfPeriodicTimeHigh = (periodicTime / 4) * 3;
+#endif
+        digitalWrite(IRpin, LOW);
+        // 38 kHz -> T = 26.31 microsec (periodic time), half of it is 13
+#if (AVR_HARDWARE_PWM || defined(DY_IRDAIKIN_SOFTIR))
+#if (defined(__AVR_ATmega2560__))
+        halfPeriodicTimeLow = 0;
+#elif (defined(__AVR_ATmega32U4__))
+		halfPeriodicTimeLow = 0;
+#else
+        halfPeriodicTimeLow = 0;
+#endif;
+#else
+        halfPeriodicTimeLow = (periodicTime / 4) + (periodicTime % 4);
+#endif
     }
 }
 
 void DYIRDaikinSend::delayMicrosecondsEnhance(uint32_t usec)
 {
+	if (usec <=0) {
+		return;
+	}
+#if AVR_HARDWARE_PWM
+    while (usec--) {
+        _delay_us(1);
+
+    }
+#else
     if (usec > 100)
     {
         uint32_t tStart,tNow;
@@ -166,11 +184,6 @@ void DYIRDaikinSend::delayMicrosecondsEnhance(uint32_t usec)
         if (usec > 1)
             delayMicroseconds(usec-1);
     }
+#endif
 }
 
-void DYIRDaikinSend::delayMicrosecondsSys(uint32_t usec) {
-  while(usec--) {
-    _delay_us(1);
-
-  }
-}
