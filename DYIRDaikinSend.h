@@ -19,6 +19,7 @@ public:
     void space(int usec);
     void delayMicrosecondsEnhance(uint32_t usec);
 private:
+	void sendIRWarm();
     int halfPeriodicTimeHigh;
     int halfPeriodicTimeLow;
     int IRpin;

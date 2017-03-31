@@ -21,6 +21,7 @@ void DYIRDaikinSend::begin(int IRsendPin)
 
 void DYIRDaikinSend::sendDaikin(unsigned char buf[], int len, int start) {
     int data2;
+	sendIRWarm();
     enableIROut(DY_IRDAIKIN_FREQUENCY);
     mark(DAIKIN_HDR_MARK);
     space(DAIKIN_HDR_SPACE);
@@ -65,6 +66,13 @@ void DYIRDaikinSend::sendDaikinWake() {
     space(DAIKIN_ZERO_MARK);
 }
 
+void DYIRDaikinSend::sendIRWarm() {
+    digitalWrite(IRpin, HIGH);
+    delayMicrosecondsEnhance(100);
+    digitalWrite(IRpin, LOW);
+    delayMicrosecondsEnhance(5);
+}
+
 void DYIRDaikinSend::sendRaw(unsigned int buf[], int len, int hz)
 {
     enableIROut(hz);
@@ -98,8 +106,10 @@ void DYIRDaikinSend::mark(int time) {
         unsigned long nowTime = micros();
         while (nowTime - beginTime < endTime) {
             digitalWrite(IRpin, HIGH);
+            //PORTD |= B00000100;
             delayMicrosecondsEnhance(halfPeriodicTimeHigh);
             digitalWrite(IRpin, LOW);
+            //PORTD &= B11111011;
             delayMicrosecondsEnhance(halfPeriodicTimeLow);
             nowTime = micros();
         }
