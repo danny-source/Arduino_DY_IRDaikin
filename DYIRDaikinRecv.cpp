@@ -447,7 +447,7 @@ uint8_t DYIRDaikinRecv::isOneMatched(uint16_t lowTimeCounter,uint16_t highTimeco
 uint8_t DYIRDaikinRecv::isZeroMatched(uint16_t lowTimeCounter,uint16_t highTimecounter)
 {
 
-	if ((lowTimeCounter > 20 && lowTimeCounter < 60) && (highTimecounter >= 10 && highTimecounter < 40)) {
+	if ((lowTimeCounter > 15 && lowTimeCounter < 60) && (highTimecounter >= 10 && highTimecounter < 58)) {
 		return 1;
 	}
 	return 0;
@@ -455,7 +455,7 @@ uint8_t DYIRDaikinRecv::isZeroMatched(uint16_t lowTimeCounter,uint16_t highTimec
 
 uint8_t DYIRDaikinRecv::isStartMatched(uint16_t lowTimeCounter,uint16_t highTimecounter)
 {
-	if ((lowTimeCounter > 50 && lowTimeCounter < 400) && (highTimecounter > 70  && highTimecounter < 250)) {
+	if ((lowTimeCounter > 50 && lowTimeCounter < 450) && (highTimecounter > 70  && highTimecounter < 250)) {
 		return 1;
 	}
 	return 0;
