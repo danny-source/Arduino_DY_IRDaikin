@@ -112,7 +112,7 @@ uint8_t DYIRDaikinRecv::decodePerPacket() {
 		}else if (isOneMatched(irStateDurationBuf[0],irStateDurationBuf[1]) == 1){
 			fillBitToByte(receiveBuffer, 1, &receiveBufferBitPtr, &receiveBufferIndex);
 		}else {
-			return SIGNAL_PATTERN_PACKET_ERROR;
+			fillBitToByte(receiveBuffer, 1, &receiveBufferBitPtr, &receiveBufferIndex);
 		}
 		return SIGNAL_PATTERN_PACKET;
 	}
@@ -171,7 +171,7 @@ uint8_t DYIRDaikinRecv::dumpPackets() {
 				bitCounter = -1;
 			}
 			//
-			//if ((signalCounter == 4) && (result == SIGNAL_PATTERN_PACKET)) {
+			//if ((signalCounter == 300) && (result == SIGNAL_PATTERN_PACKET)) {
 				//DYIRDAIKIN_DEBUG_PRINT(irStateBuf[0],DEC);
 				//DYIRDAIKIN_DEBUG_PRINT(",");
 				//DYIRDAIKIN_DEBUG_PRINTLN(irStateDurationBuf[0],DEC);
@@ -211,7 +211,9 @@ uint8_t DYIRDaikinRecv::dumpPackets() {
 						}
 					}
 					#ifdef DEBUG_IR_PRINT
-						DYIRDAIKIN_DEBUG_PRINT("=Decoded=");
+						DYIRDAIKIN_DEBUG_PRINTLN("=Decoded=");
+						DYIRDAIKIN_DEBUG_PRINT("scount:");
+						DYIRDAIKIN_DEBUG_PRINTLN(signalCounter,DEC);
 						DYIRDAIKIN_DEBUG_PRINT("bytes:");
 						DYIRDAIKIN_DEBUG_PRINTLN(irReceiveDataLen,DEC);
 						DYIRDAIKIN_DEBUG_PRINT("pcount:");
@@ -438,7 +440,7 @@ void DYIRDaikinRecv::printARCState(uint8_t *recvData) {
 
 uint8_t DYIRDaikinRecv::isOneMatched(uint16_t lowTimeCounter,uint16_t highTimecounter)
 {
-	if ((lowTimeCounter > 15 && lowTimeCounter < 56) && (highTimecounter >= (lowTimeCounter + lowTimeCounter)  && highTimecounter < 150)) {
+	if ((lowTimeCounter > 15 && lowTimeCounter < 56) && ((highTimecounter) >= (lowTimeCounter + lowTimeCounter)  && highTimecounter < 150)) {
 		return 1;
 	}
 	return 0;
