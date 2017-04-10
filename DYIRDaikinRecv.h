@@ -23,7 +23,7 @@ private:
 	unsigned long 	bitCounter = 0;
 	unsigned long	signalCounter = 0;
 
-	uint16_t 	packetCounter =0;
+	uint8_t 	packetCounter =0;
 	uint8_t		packetLength;
 	uint8_t 	packetNumber = 0;
 
