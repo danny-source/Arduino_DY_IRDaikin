@@ -108,7 +108,7 @@ uint8_t DYIRDaikin::getSwingLR()
 void DYIRDaikin::setMode(uint8_t mode)
 {
 	uint8_t trmode = vModeTable[mode];
-	if (mode>=0 && mode <=3)
+	if (mode>=0 && mode <=4)
 	{
 		daikin[13]=trmode<<4 | getPower();
 		checksum();
@@ -121,6 +121,8 @@ uint8_t DYIRDaikin::getMode()
 	if (mode == 0x6) mode = 0;
 	if (mode == 0x3) mode = 1;
 	if (mode == 0x2) mode = 2;
+	if (mode == 0x4) mode = 3;
+	if (mode == 0x0) mode = 4;
 	return mode;
 }
 

@@ -200,9 +200,15 @@ uint8_t DYIRDaikinRecv::dumpPackets() {
 
 					if ((packetLength == 3) && (packetCounter == 3)) {
 						printARCState(receiveBuffer);
+						for (int idx = 0;idx < irReceiveDataLen;idx++) {
+							irReceiveDataP0[idx] = receiveBuffer[idx];
+						}
 					}
 					if ((packetLength == 2) && (packetCounter == 2)){
 						printARCState(receiveBuffer);
+						for (int idx = 0;idx < irReceiveDataLen;idx++) {
+							irReceiveDataP0[idx] = receiveBuffer[idx];
+						}
 					}
 					#ifdef DEBUG_IR_PRINT
 						DYIRDAIKIN_DEBUG_PRINT("=Decoded=");
@@ -353,10 +359,19 @@ void DYIRDaikinRecv::printARCState(uint8_t *recvData) {
 		timeNow = (uint16_t)recvData[5]|(uint16_t)(recvData[6] & B00000111)<<8;
 	}
 
-	//~ static byte vModeTable[] = { 0x6,0x3,0x2};
-	if (mode == 0x6) mode = 0;
-	if (mode == 0x3) mode = 1;
-	if (mode == 0x2) mode = 2;
+	//{ 0x6,0x3,0x2,0x4,0x00};
+	//0 FAN 1 COOL 2 DRY 3 HEAT
+	if (mode == 0x6) {
+		 mode = 0;
+	}else if (mode == 0x3) {
+		mode = 1;
+	}else if (mode == 0x2) {
+		mode = 2;
+	}else if (mode == 0x4) {
+		mode = 3;
+	}else if (mode == 0x0) {
+		mode = 4;
+	}
 
 	uint8_t econo = (recvData[16] & B00000100) >> 2;
 
@@ -366,6 +381,22 @@ void DYIRDaikinRecv::printARCState(uint8_t *recvData) {
 	DYIRDAIKIN_DEBUG_PRINTLN();
 	DYIRDAIKIN_DEBUG_PRINT("Mode:");
 	DYIRDAIKIN_DEBUG_PRINT(mode,DEC);
+	if (mode == 0) {
+		DYIRDAIKIN_DEBUG_PRINT(" (FAN");
+	}
+	if (mode == 1) {
+		DYIRDAIKIN_DEBUG_PRINT(" (COOL");
+	}
+	if (mode == 2) {
+		DYIRDAIKIN_DEBUG_PRINT(" (DRY");
+	}
+	if (mode == 3) {
+		DYIRDAIKIN_DEBUG_PRINT(" (HEAT");
+	}
+	if (mode == 4) {
+		DYIRDAIKIN_DEBUG_PRINT(" (AUTO");
+	}
+
 	DYIRDAIKIN_DEBUG_PRINTLN();
 	DYIRDAIKIN_DEBUG_PRINT("Fan:");
 	DYIRDAIKIN_DEBUG_PRINT(fan,DEC);
