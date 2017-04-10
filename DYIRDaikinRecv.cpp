@@ -43,6 +43,8 @@ uint8_t DYIRDaikinRecv::begin(uint8_t pin,uint8_t *buffer,uint8_t buffer_size)
 	packetLength = 3;
 	irState = irLastState = digitalRead(irPin);
 	irReceiveDataLen = 0;
+	receiveBufferBitPtr = 0;
+	receiveBufferIndex = 0;
 	return 1;
 }
 
@@ -88,7 +90,7 @@ uint8_t DYIRDaikinRecv::decodePerPacket() {
 		}
 		//first detect start pattern, it is 2 packets protocol
 		if (isStartMatched(irStateDurationBuf[0],irStateDurationBuf[1]) == 1) {
-			DYIRDAIKIN_DEBUG_PRINTLN("SB");
+			//DYIRDAIKIN_DEBUG_PRINTLN("SB");
 			wakePatternCounter = 0;
 			irPatternStateMachine = 1;
 			packetLength = (hasWakupPattern == 1 ? 3: 2);
@@ -106,11 +108,11 @@ uint8_t DYIRDaikinRecv::decodePerPacket() {
 			return SIGNAL_PATTERN_STOP;
 		}
 		if (isZeroMatched(irStateDurationBuf[0],irStateDurationBuf[1]) == 1) {
-			fillBitToByte(receiveBuffer, 0,receiveBufferBitPtr, receiveBufferIndex);
-		}else if (isOneMatched(irStateDurationBuf[0],irStateDurationBuf[1]) == 1) {
-			fillBitToByte(receiveBuffer, 1,receiveBufferBitPtr, receiveBufferIndex);
+			fillBitToByte(receiveBuffer, 0, &receiveBufferBitPtr, &receiveBufferIndex);
+		}else if (isOneMatched(irStateDurationBuf[0],irStateDurationBuf[1]) == 1){
+			fillBitToByte(receiveBuffer, 1, &receiveBufferBitPtr, &receiveBufferIndex);
 		}else {
-			fillBitToByte(receiveBuffer, 1,receiveBufferBitPtr, receiveBufferIndex);//return 4;
+			return SIGNAL_PATTERN_PACKET_ERROR;
 		}
 		return SIGNAL_PATTERN_PACKET;
 	}
@@ -153,17 +155,23 @@ uint8_t DYIRDaikinRecv::dumpPackets() {
 				//packet is fail ,restart
 				irPatternStateMachine = 0;
 				DYIRDAIKIN_DEBUG_PRINTLN("packet detect is error,restart");
+				DYIRDAIKIN_DEBUG_PRINT(irStateBuf[0],DEC);
+				DYIRDAIKIN_DEBUG_PRINT(",");
+				DYIRDAIKIN_DEBUG_PRINTLN(irStateDurationBuf[0],DEC);
+				DYIRDAIKIN_DEBUG_PRINT(irStateBuf[1],DEC);
+				DYIRDAIKIN_DEBUG_PRINT(",");
+				DYIRDAIKIN_DEBUG_PRINTLN(irStateDurationBuf[1],DEC);
 				return 0;
 			}
 			if (result == SIGNAL_PATTERN_WAKUP) {
 
 			}
 			if (result == SIGNAL_PATTERN_START) {
-				signalCounter = 0;
-				bitCounter = 0;
+				signalCounter = 2;
+				bitCounter = -1;
 			}
 			//
-			//if ((signalCounter == 2) && (result == 1)) {
+			//if ((signalCounter == 4) && (result == SIGNAL_PATTERN_PACKET)) {
 				//DYIRDAIKIN_DEBUG_PRINT(irStateBuf[0],DEC);
 				//DYIRDAIKIN_DEBUG_PRINT(",");
 				//DYIRDAIKIN_DEBUG_PRINTLN(irStateDurationBuf[0],DEC);
@@ -187,19 +195,28 @@ uint8_t DYIRDaikinRecv::dumpPackets() {
 				bitCounter++;
 				result = decodePerPacket();
 				if (result == SIGNAL_PATTERN_STOP) {
+					irReceiveDataLen = receiveBufferIndex + 1;
 				#ifdef DEBUG_IR_PRINT
-					DYIRDAIKIN_DEBUG_PRINTLN("=Decoded=");
-					DYIRDAIKIN_DEBUG_PRINT("=wave counter:");
-					DYIRDAIKIN_DEBUG_PRINTLN(signalCounter,DEC);
-					DYIRDAIKIN_DEBUG_PRINT("=bit counter:");
-					DYIRDAIKIN_DEBUG_PRINTLN(bitCounter,DEC);
-					DYIRDAIKIN_DEBUG_PRINT("=byte counter:");
-					irReceiveDataLen = receiveBufferIndex;
+					DYIRDAIKIN_DEBUG_PRINT("=Decoded=");
+					DYIRDAIKIN_DEBUG_PRINT("bytes:");
 					DYIRDAIKIN_DEBUG_PRINTLN(irReceiveDataLen,DEC);
 					DYIRDAIKIN_DEBUG_PRINTLN("--");
-					for (int idx = 0;idx < receiveBufferIndex;idx++) {
-						DYIRDAIKIN_DEBUG_PRINT(receiveBuffer[idx],HEX);
+					for (int idx = 0;idx < irReceiveDataLen;idx++) {
+						if (receiveBuffer[idx] < 16) {
+							DYIRDAIKIN_DEBUG_PRINT("0");
+							DYIRDAIKIN_DEBUG_PRINT(receiveBuffer[idx],HEX);
+						}else{
+							DYIRDAIKIN_DEBUG_PRINT(receiveBuffer[idx],HEX);
+						}
+						DYIRDAIKIN_DEBUG_PRINT("-");
 					}
+					DYIRDAIKIN_DEBUG_PRINTLN("");
+					if (checkSum(receiveBuffer,irReceiveDataLen) == 1) {
+						DYIRDAIKIN_DEBUG_PRINTLN("CRC OK");
+					}else {
+						DYIRDAIKIN_DEBUG_PRINTLN("CRC ERR");
+					}
+					DYIRDAIKIN_DEBUG_PRINTLN("--");
 				#endif
 					hasWakupPattern = 0;
 					return 1;
@@ -251,31 +268,47 @@ uint8_t DYIRDaikinRecv::checkSum(uint8_t *buffer,uint8_t len)
 	for (uint8_t i =0;i< (len - 1);i++) {
 		sum = (uint8_t)(sum + buffer[i]);
 	}
-	//~ DYIRDAIKIN_DEBUG_PRINTLN();
-	//~ DYIRDAIKIN_DEBUG_PRINT(sum,HEX);
-	//~ DYIRDAIKIN_DEBUG_PRINT("-");
-	//~ DYIRDAIKIN_DEBUG_PRINT(buffer[len],HEX);
-	//~ DYIRDAIKIN_DEBUG_PRINTLN();
-	if (buffer[len] == sum) {
+	DYIRDAIKIN_DEBUG_PRINTLN();
+	if (sum < 16) {
+		DYIRDAIKIN_DEBUG_PRINT("0");
+		DYIRDAIKIN_DEBUG_PRINT(sum,HEX);
+	}else {
+		DYIRDAIKIN_DEBUG_PRINT(sum,HEX);
+	}
+	DYIRDAIKIN_DEBUG_PRINT("-");
+	if (buffer[len - 1] < 16) {
+		DYIRDAIKIN_DEBUG_PRINT("0");
+		DYIRDAIKIN_DEBUG_PRINT(buffer[len - 1],HEX);
+	}else {
+		DYIRDAIKIN_DEBUG_PRINT(buffer[len - 1],HEX);
+	}
+	DYIRDAIKIN_DEBUG_PRINTLN();
+	if (buffer[len - 1] == sum) {
 		return 1;
 	}
 	return 0;
 }
 
-void DYIRDaikinRecv::fillBitToByte(uint8_t *buffer, uint8_t value, int bitPtr, int bufferIndex) {
-	if (bitPtr>7) {
-		bufferIndex++;
-		bitPtr = 0;
+void DYIRDaikinRecv::fillBitToByte(uint8_t *buffer, uint8_t value, uint8_t *bitPtr, uint8_t *bufferIndex) {
+	uint8_t _bitPtr;
+	uint8_t _bufferIndex;
+	_bitPtr = *bitPtr;
+	_bufferIndex = *bufferIndex;
+	if (_bitPtr > 7) {
+		_bufferIndex++;
+		_bitPtr = 0;
 	}else {
-		buffer[bufferIndex] = buffer[bufferIndex] >> 1;
+		buffer[_bufferIndex] = buffer[_bufferIndex] >> 1;
 	}
 	if (value == 1) {
-		buffer[bufferIndex] = buffer[bufferIndex] | B10000000;
+		buffer[_bufferIndex] = buffer[_bufferIndex] | B10000000;
 	}
 	if (value == 0) {
-		buffer[bufferIndex] = buffer[bufferIndex] & B01111111;
+		buffer[_bufferIndex] = buffer[_bufferIndex] & B01111111;
 	}
-	bitPtr++;
+	_bitPtr++;
+	*bitPtr = _bitPtr;
+	*bufferIndex = _bufferIndex;
 }
 //
 void DYIRDaikinRecv::printARCState(uint8_t *recvData) {
@@ -364,7 +397,7 @@ uint8_t DYIRDaikinRecv::isOneMatched(uint16_t lowTimeCounter,uint16_t highTimeco
 uint8_t DYIRDaikinRecv::isZeroMatched(uint16_t lowTimeCounter,uint16_t highTimecounter)
 {
 
-	if ((lowTimeCounter > 20 && lowTimeCounter < 60) && (highTimecounter > 15 && highTimecounter < 40)) {
+	if ((lowTimeCounter > 20 && lowTimeCounter < 60) && (highTimecounter >= 10 && highTimecounter < 40)) {
 		return 1;
 	}
 	return 0;

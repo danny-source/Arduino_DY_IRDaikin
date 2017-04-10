@@ -42,15 +42,15 @@ private:
 	unsigned long irStateDurationBuf[2] = {0};
 	//
 	uint8_t		receiveBuffer[26] = {0};
-	uint8_t		receiveBufferBitPtr;
-	uint8_t		receiveBufferIndex;
+	uint8_t		receiveBufferBitPtr = 0;
+	uint8_t		receiveBufferIndex = 0;
 
 //
 uint8_t isSignalLowHighPaired();
 //uint8_t decodePackets();
 uint8_t decodePerPacket();
 uint8_t checkSum(uint8_t *buffer,uint8_t len);
-void fillBitToByte(uint8_t *buffer, uint8_t value, int bitPtr, int bufferIndex);
+void fillBitToByte(uint8_t *buffer, uint8_t value, uint8_t *bitPtr, uint8_t *bufferIndex);
 void printARCState(uint8_t *recvData);
 uint8_t isOneMatched(uint16_t lowTimeCounter,uint16_t highTimecounter);
 uint8_t isZeroMatched(uint16_t lowTimeCounter,uint16_t highTimecounter);
