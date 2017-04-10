@@ -2,6 +2,17 @@
 #ifndef DYIRDaikinDef_h
 #define DYIRDaikinDef_h
 
+#define DYIRDAIKIN_DEBUG
+#define DYIRDAIKIN_DEBUG_SERIAL Serial
+
+#ifdef DYIRDAIKIN_DEBUG
+  #define DYIRDAIKIN_DEBUG_PRINT(...) { DYIRDAIKIN_DEBUG_SERIAL.print(__VA_ARGS__); }
+  #define DYIRDAIKIN_DEBUG_PRINTLN(...) { DYIRDAIKIN_DEBUG_SERIAL.println(__VA_ARGS__); }
+#else
+  #define DYIRDAIKIN_DEBUG_PRINT(...) {}
+  #define DYIRDAIKIN_DEBUG_PRINTLN(...) {}
+#endif
+
 //#define DY_IRDAIKIN_SOFTIR
 
 #define AVR_HARDWARE_PWM \

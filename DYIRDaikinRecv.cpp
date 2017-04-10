@@ -1,44 +1,28 @@
-/*
- * Arduino IRremote Daikin 2015
- * Copyright 2015 danny
- *
- *
- * enableIROut declare base on  Ken Shirriff's IRremote library.
- * http://arcfn.com/2009/08/multi-protocol-infrared-remote-library.html
- *
- *
- */
+
 #include <DYIRDaikinRecv.h>
 
 //decode
 #define SAMPLE_DELAY_TIME 10//uS
 #define IDLE_TIMER_COUNT ((1000*13)/SAMPLE_DELAY_TIME)//SAMPLE_DELAY_TIME*100*13
 #define BUFFER_SIZE 310
+#define NORMAL_INPUT_STATE 1
 //
-//~ #define DEBUG_IR_PRINT
+#define SIGNAL_TIMEOUT__COUNT (6000/SAMPLE_DELAY_TIME)
+#define PACKET_TIMEOUT__COUNT (40000/SAMPLE_DELAY_TIME)
+
+// 0:none,1:start,2:packet,3:stop,4 packet error,5:wake
+#define SIGNAL_PATTERN_START 1
+#define SIGNAL_PATTERN_PACKET 2
+#define SIGNAL_PATTERN_STOP 3
+#define SIGNAL_PATTERN_PACKET_ERROR 4
+#define SIGNAL_PATTERN_WAKUP 5
+//
+#define SIGNAL_PAIRED	2
+
+//
+#define DEBUG_IR_PRINT
 //~ #define DEBUG_IR_PRINT_DECODED_DATA
 
-	uint8_t irPin = 7;
-//
-	uint8_t 	irState = 1;
-	uint8_t 	irLastState = 1;
-	uint16_t 	stopBitCounter = 0;
-	uint16_t 	timeoutCounter = 0; //about 120ms
-	uint16_t 	timeCounter =0;
-	uint16_t 	packetCounter =0;
-	uint8_t	packetLength = 3;
-	uint8_t 	packetNumber = 0;
-	uint8_t 	irStateBuf[2]= {0};
-	uint8_t	hasPacket = 0;
-	unsigned long irDurationBuf[2] = {0};
-	uint16_t 	idx = 0;
-	uint16_t 	bitCounter = 0;
-	uint8_t	irPatternStateMachine = 0;
-	uint8_t	irRawSateMachine = 0;
-	uint8_t	wakePatternCounter = 0;
-	uint8_t	*irReceiveDataP0;
-	uint8_t	irReceiveDataLen = 0;
-//
 uint8_t DYIRDaikinRecv::begin(uint8_t pin,uint8_t *buffer,uint8_t buffer_size)
 {
 	if (buffer_size <24) {
@@ -46,13 +30,15 @@ uint8_t DYIRDaikinRecv::begin(uint8_t pin,uint8_t *buffer,uint8_t buffer_size)
 	}
 	irPin = pin;
 	pinMode(irPin,INPUT);
+	pinMode(3,OUTPUT);
+	PORTD |= B00001000;
 	irReceiveDataP0 = buffer;
 	memset(irReceiveDataP0,0,buffer_size);
 	hasPacket = 0;
 	packetCounter =0;
+	signalCounter = 0;
 	bitCounter = 0;
 	irPatternStateMachine = 0;
-	packetCounter = 0;
 	wakePatternCounter = 0;
 	packetLength = 3;
 	irState = irLastState = digitalRead(irPin);
@@ -60,193 +46,203 @@ uint8_t DYIRDaikinRecv::begin(uint8_t pin,uint8_t *buffer,uint8_t buffer_size)
 	return 1;
 }
 
-uint8_t DYIRDaikinRecv::decode() {
 
-  // put your main code here, to run repeatedly:
-  for (;;) {
-    irState = digitalRead(irPin);
-    if (irState!=irLastState) {
-      break;
-    }
-    irLastState = irState;
-    return 0;//polling
-  }
-  //start sniffer
-  timeCounter = 1;
-  stopBitCounter = 0;
-  timeoutCounter = 0;
-  hasPacket = 0;
-  irLastState = irState;
-  idx = 0;
-  //searching ir data
-  //~ cli();
-  while (1) {
-    _delay_us(SAMPLE_DELAY_TIME);
-    irState = digitalRead(irPin);
-    //
-    if (irState!=irLastState) {
-		if (irDataStoreBuffer() == 2) {
-	      decodeIR(false);
-		}
-      timeCounter = 0;
-      stopBitCounter = 0;
-    }//if (irState!=irLastState) {
-    //
-    stopBitCounter ++;
-    timeCounter++;
-    timeoutCounter;
-    irLastState = irState;
-    //
-    if (stopBitCounter > IDLE_TIMER_COUNT) {
-		if (irDataStoreBuffer() == 2) {
-			if (decodeIR(true) > 0) {
-				if (checkSum(irReceiveDataP0,irReceiveDataLen) == 0) {
-					#ifdef DEBUG_IR_PRINT
-						Serial.println("=CRC Fail=");
-						hasPacket = 1;
-						break;
-					#endif
+uint8_t DYIRDaikinRecv::decode() {
+}
+/*
+ * 0:none 2:paired
+*/
+uint8_t DYIRDaikinRecv::isSignalLowHighPaired()
+{
+	irStateBufIdx = irSignalState;
+	irStateBuf[irStateBufIdx] = irSignalState;
+	irStateDurationBuf[irStateBufIdx] = irSignalDuation;
+	if (irSignalState == 1) {
+		return 2;
+	}
+	return 0;
+}
+
+// 0:none,1:start,2:packet,3:stop,4 packet error,5:wake
+uint8_t DYIRDaikinRecv::decodePerPacket() {
+
+	if (irPatternStateMachine == 0) {
+		//detect 3 packets pattern that first have 4 zero pattern,it is 3 packets protocol
+		if (isZeroMatched(irStateDurationBuf[0],irStateDurationBuf[1]) == 1) {
+			wakePatternCounter++;
+			if ((wakePatternCounter > 3)) {
+				if (hasWakupPattern == 0) {
+					DYIRDAIKIN_DEBUG_PRINTLN("wake");
+					hasWakupPattern = 1;
+					PORTD &= B11110111;
 				}else {
-					hasPacket = 1;
-					break;
+					PORTD |= B00001000;
 				}
-			}else {
-				#ifdef DEBUG_IR_PRINT
-				Serial.println("=Fail=");
-				#endif
+				return SIGNAL_PATTERN_WAKUP;
 			}
 		}
-		hasPacket = 0;
-		packetCounter =0;
-		bitCounter = 0;
-		irPatternStateMachine = 0;
-		packetCounter = 0;
-		wakePatternCounter = 0;
-		packetLength = 3;
-		irState = irLastState = digitalRead(irPin);
-		memset(irReceiveDataP0,0,25);
-		irReceiveDataLen = 0;
+		if (hasWakupPattern == 1) {
+			if (isStopMatched(irStateDurationBuf[0],irStateDurationBuf[1]) == 1) {
+				return (SIGNAL_PATTERN_STOP + SIGNAL_PATTERN_WAKUP);
+			}
+		}
+		//first detect start pattern, it is 2 packets protocol
+		if (isStartMatched(irStateDurationBuf[0],irStateDurationBuf[1]) == 1) {
+			DYIRDAIKIN_DEBUG_PRINTLN("SB");
+			wakePatternCounter = 0;
+			irPatternStateMachine = 1;
+			packetLength = (hasWakupPattern == 1 ? 3: 2);
+			receiveBufferBitPtr = 0;
+			receiveBufferIndex = 0;
+			return SIGNAL_PATTERN_START;
+		}
+		return 0;
+	}
+
+	if (irPatternStateMachine == 1) {
+		if (isStopMatched(irStateDurationBuf[0],irStateDurationBuf[1]) == 1) {
+			irPatternStateMachine = 0;
+			packetCounter++;
+			return SIGNAL_PATTERN_STOP;
+		}
+		if (isZeroMatched(irStateDurationBuf[0],irStateDurationBuf[1]) == 1) {
+			fillBitToByte(receiveBuffer, 0,receiveBufferBitPtr, receiveBufferIndex);
+		}else if (isOneMatched(irStateDurationBuf[0],irStateDurationBuf[1]) == 1) {
+			fillBitToByte(receiveBuffer, 1,receiveBufferBitPtr, receiveBufferIndex);
+		}else {
+			fillBitToByte(receiveBuffer, 1,receiveBufferBitPtr, receiveBufferIndex);//return 4;
+		}
+		return SIGNAL_PATTERN_PACKET;
+	}
+	return 0;
+}
+
+uint8_t DYIRDaikinRecv::dumpPackets() {
+
+  for(;;) {
+	irState = digitalRead(irPin);
+	if (irState == 1) {
+		return 0;
+	}else {
 		break;
+	}
+  }
+  //start sniffer
+  signalCounter = 0;
+  bitCounter = 0;
+  duationCounter = 0;
+  //
+  signalTimeoutCounter = 0;
+  packetTimeoutCounter = 0;
+  //
+  irLastState = irState = 0;
+
+  //searching ir data
+  uint8_t result = 0;
+  while (1) {
+    irState = digitalRead(irPin);
+    if (irState != irLastState) {
+		irSignalState = irLastState;
+		irSignalDuation = duationCounter;
+		signalCounter++;
+		if (isSignalLowHighPaired() == SIGNAL_PAIRED) {
+			bitCounter++;
+			signalTimeoutCounter = 0;
+			result = decodePerPacket();
+			if (result == SIGNAL_PATTERN_PACKET_ERROR) {
+				//packet is fail ,restart
+				irPatternStateMachine = 0;
+				DYIRDAIKIN_DEBUG_PRINTLN("packet detect is error,restart");
+				return 0;
+			}
+			if (result == SIGNAL_PATTERN_WAKUP) {
+
+			}
+			if (result == SIGNAL_PATTERN_START) {
+				signalCounter = 0;
+				bitCounter = 0;
+			}
+			//
+			//if ((signalCounter == 2) && (result == 1)) {
+				//DYIRDAIKIN_DEBUG_PRINT(irStateBuf[0],DEC);
+				//DYIRDAIKIN_DEBUG_PRINT(",");
+				//DYIRDAIKIN_DEBUG_PRINTLN(irStateDurationBuf[0],DEC);
+				//DYIRDAIKIN_DEBUG_PRINT(irStateBuf[1],DEC);
+				//DYIRDAIKIN_DEBUG_PRINT(",");
+				//DYIRDAIKIN_DEBUG_PRINTLN(irStateDurationBuf[1],DEC);
+			//}
+		}
+		//clear counterS
+		duationCounter = 0;
+		signalTimeoutCounter = 0;
+		packetTimeoutCounter= 0;
     }
+
+    if (signalTimeoutCounter > SIGNAL_TIMEOUT__COUNT) {
+		if (irLastState == 1) {
+			irSignalState = irLastState;
+			irSignalDuation = duationCounter;
+			signalCounter++;
+			if (isSignalLowHighPaired() == SIGNAL_PAIRED) {
+				bitCounter++;
+				result = decodePerPacket();
+				if (result == SIGNAL_PATTERN_STOP) {
+				#ifdef DEBUG_IR_PRINT
+					DYIRDAIKIN_DEBUG_PRINTLN("=Decoded=");
+					DYIRDAIKIN_DEBUG_PRINT("=wave counter:");
+					DYIRDAIKIN_DEBUG_PRINTLN(signalCounter,DEC);
+					DYIRDAIKIN_DEBUG_PRINT("=bit counter:");
+					DYIRDAIKIN_DEBUG_PRINTLN(bitCounter,DEC);
+					DYIRDAIKIN_DEBUG_PRINT("=byte counter:");
+					irReceiveDataLen = receiveBufferIndex;
+					DYIRDAIKIN_DEBUG_PRINTLN(irReceiveDataLen,DEC);
+					DYIRDAIKIN_DEBUG_PRINTLN("--");
+					for (int idx = 0;idx < receiveBufferIndex;idx++) {
+						DYIRDAIKIN_DEBUG_PRINT(receiveBuffer[idx],HEX);
+					}
+				#endif
+					hasWakupPattern = 0;
+					return 1;
+
+				}else if (result == (SIGNAL_PATTERN_STOP + SIGNAL_PATTERN_WAKUP)) {
+					DYIRDAIKIN_DEBUG_PRINTLN("=WAKEUP+STOP=1=");
+					return 0;
+				}else {
+					DYIRDAIKIN_DEBUG_PRINTLN("=Timeout=2=");
+					return 0;
+				}
+			}else if (result == SIGNAL_PATTERN_WAKUP) {
+				DYIRDAIKIN_DEBUG_PRINTLN("=WAKEUP=RETURN=2=");
+				return 0;
+			}else {
+			#ifdef DEBUG_IR_PRINT
+				DYIRDAIKIN_DEBUG_PRINTLN("=Timeout=1=");
+			#endif
+				hasWakupPattern = 0;
+				return 0;
+			}
+			duationCounter = 0;
+			signalCounter = 0;
+		}
+		signalTimeoutCounter = 0;
+	}//signal timeout
+	if (packetTimeoutCounter > PACKET_TIMEOUT__COUNT) {
+		#ifdef DEBUG_IR_PRINT
+			DYIRDAIKIN_DEBUG_PRINTLN("=Packet=Timeout=0=");
+		#endif
+		hasWakupPattern = 0;
+		return 0;
+	}
+
+    irLastState = irState;
+	_delay_us(SAMPLE_DELAY_TIME);
+	signalTimeoutCounter++;
+	packetTimeoutCounter++;
+    duationCounter++;
   //------------------------------------------------------
 
   }//while
-  //~ sei();
-	if (hasPacket == 1) {//default 3
-		#ifdef DEBUG_IR_PRINT
-		Serial.println();
-        for (uint16_t i = 0;i < 25; i++) {
-			Serial.print(irReceiveDataP0[i],HEX);
-			Serial.print(" ");
-        }
-        Serial.println();
-        #endif
-        #ifdef DEBUG_IR_PRINT_DECODED_DATA
-        if (irReceiveDataLen >10) {
-	        printARCState(irReceiveDataP0);
-		}
-		#endif
-		hasPacket = 0;
-        bitCounter = 0;
-        irPatternStateMachine = 0;
-        packetCounter = 0;
-        wakePatternCounter = 0;
-        packetCounter =0;
-        return irReceiveDataLen;
-    }
     return 0;
-}
-
-/*
- * 0:none 1:store to buffer 2:pair store to buffer
-*/
-uint8_t DYIRDaikinRecv::irDataStoreBuffer()
-{
-	if (irRawSateMachine == 0) {
-		if (irLastState == 0) {
-			irStateBuf[0] = irLastState;
-			irDurationBuf[0] = timeCounter;
-			irRawSateMachine = 1;
-			return 1;
-		}
-		return 0;
-	}
-	if ( irRawSateMachine == 1) {
-		if (irLastState == 1) {
-			irStateBuf[1] = irLastState;
-			irDurationBuf[1] = timeCounter;
-			irRawSateMachine = 0;
-			return 2;
-		}else {
-			irStateBuf[0] = irLastState;
-			irDurationBuf[0] = timeCounter;
-			irRawSateMachine = 1;
-			return 1;
-		}
-		return 0;
-	}
-}
-
-uint8_t DYIRDaikinRecv::decodeIR(bool lastBit) {
-
-	if (irPatternStateMachine == 0) {
-		//~ skip wake up pattern
-		if (isZeroMatched(irDurationBuf[0],irDurationBuf[1]) == 1) {
-			wakePatternCounter++;
-		}
-		if (lastBit == true) {
-			if (wakePatternCounter > 4) {
-				irPatternStateMachine = 1;
-				wakePatternCounter = 0;
-				packetLength = 3;
-				packetCounter = -1;
-				irReceiveDataLen = 0;
-				memset(irReceiveDataP0,0,25);
-				return 1;
-			}
-			return 0;
-		}
-		//start bit
-		if (isStartMatched(irDurationBuf[0],irDurationBuf[1]) == 1) {
-			//some model no wake up pattern and only 2 packet
-			packetLength = 1;
-			irPatternStateMachine = 2;
-			irReceiveDataLen = 0;
-			bitToByteBuffer(irReceiveDataP0,0,1,NULL);
-			memset(irReceiveDataP0,0,25);
-			return 1;
-		}else {
-			return 0;
-		}
-	}
-	//
-	if (irPatternStateMachine == 1) {//start bit
-	  //~ skipe start bit
-	  if (isStartMatched(irDurationBuf[0],irDurationBuf[1]) == 1) {
-		irPatternStateMachine = 2;
-		bitToByteBuffer(irReceiveDataP0,0,1,NULL);
-		return 1;
-	  }
-	  return 0;
-	}
-	if (irPatternStateMachine == 2) {//packet number 1
-		if (lastBit == true){
-			if (isStopMatched(irDurationBuf[0],irDurationBuf[1]) == 1) {
-				irPatternStateMachine = 0;
-				packetLength++;
-				return 1;
-			}else {
-				irPatternStateMachine = 0;
-				return 0;
-			}
-		}
-		if (isZeroMatched(irDurationBuf[0],irDurationBuf[1]) == 1) {
-			bitToByteBuffer(irReceiveDataP0,0,0,&irReceiveDataLen);
-		}else {
-			bitToByteBuffer(irReceiveDataP0,1,0,&irReceiveDataLen);
-		}
-		return 0;
-	}
 }
 
 uint8_t DYIRDaikinRecv::checkSum(uint8_t *buffer,uint8_t len)
@@ -255,42 +251,31 @@ uint8_t DYIRDaikinRecv::checkSum(uint8_t *buffer,uint8_t len)
 	for (uint8_t i =0;i< (len - 1);i++) {
 		sum = (uint8_t)(sum + buffer[i]);
 	}
-	//~ Serial.println();
-	//~ Serial.print(sum,HEX);
-	//~ Serial.print("-");
-	//~ Serial.print(buffer[len],HEX);
-	//~ Serial.println();
+	//~ DYIRDAIKIN_DEBUG_PRINTLN();
+	//~ DYIRDAIKIN_DEBUG_PRINT(sum,HEX);
+	//~ DYIRDAIKIN_DEBUG_PRINT("-");
+	//~ DYIRDAIKIN_DEBUG_PRINT(buffer[len],HEX);
+	//~ DYIRDAIKIN_DEBUG_PRINTLN();
 	if (buffer[len] == sum) {
 		return 1;
 	}
 	return 0;
 }
 
-void DYIRDaikinRecv::bitToByteBuffer(uint8_t *buffer, uint8_t value, int restart,uint8_t *bufferPtr) {
-	static uint8_t bitIndex = 0;
-	static uint8_t bufferIndex = 0;
-	//~ Serial.print(value,DEC);
-	if (restart == 1) {
-		bitIndex = 0;
-		bufferIndex = 0;
-		return;
-	}
-	if (bitIndex>7) {
+void DYIRDaikinRecv::fillBitToByte(uint8_t *buffer, uint8_t value, int bitPtr, int bufferIndex) {
+	if (bitPtr>7) {
 		bufferIndex++;
-		bitIndex = 0;
+		bitPtr = 0;
 	}else {
 		buffer[bufferIndex] = buffer[bufferIndex] >> 1;
 	}
 	if (value == 1) {
-		buffer[bufferIndex] = buffer[bufferIndex]|0x80;
+		buffer[bufferIndex] = buffer[bufferIndex] | B10000000;
 	}
 	if (value == 0) {
-
+		buffer[bufferIndex] = buffer[bufferIndex] & B01111111;
 	}
-	bitIndex++;
-	if (!(bufferPtr == NULL)) {
-		*bufferPtr = bufferIndex;
-	}
+	bitPtr++;
 }
 //
 void DYIRDaikinRecv::printARCState(uint8_t *recvData) {
@@ -326,51 +311,51 @@ void DYIRDaikinRecv::printARCState(uint8_t *recvData) {
 
 	uint8_t econo = (recvData[16] & B00000100) >> 2;
 
-	Serial.print("\r\n===\r\n");
-	Serial.print("Power:");
-	Serial.print(powerState,DEC);
-	Serial.println();
-	Serial.print("Mode:");
-	Serial.print(mode,DEC);
-	Serial.println();
-	Serial.print("Fan:");
-	Serial.print(fan,DEC);
-	Serial.println();
-	Serial.print("Temperature:");
-	Serial.print(temperature,DEC);
-	Serial.println();
-	Serial.print("Swing:");
-	Serial.print(swing,DEC);
-	Serial.println();
-	//~ Serial.print("Econo:");
-	//~ Serial.print(econo,DEC);
-	//~ Serial.println();
-	//~ Serial.print("Timer On:");
-	//~ Serial.print(timerOn,DEC);
-	//~ Serial.println();
-	//~ Serial.print("Timer On Value:");
-	//~ Serial.print((timerOnValue / 60),DEC);
-	//~ Serial.print(":");
-	//~ Serial.print((timerOnValue % 60),DEC);
-	//~ Serial.println();
-	//~ Serial.print("Timer Off:");
-	//~ Serial.print(timerOff,DEC);
-	//~ Serial.println();
-	//~ Serial.print("Timer Off Value:");
-	//~ Serial.print((timerOffValue / 60),DEC);
-	//~ Serial.print(":");
-	//~ Serial.print((timerOffValue % 60),DEC);
-	//~ Serial.println();
-	//~ Serial.print("Timer Now:");
-	//~ Serial.print((timeNow / 60),DEC);
-	//~ Serial.print(":");
-	//~ Serial.print((timeNow % 60),DEC);
-	//~ Serial.println();
+	DYIRDAIKIN_DEBUG_PRINT("\r\n===\r\n");
+	DYIRDAIKIN_DEBUG_PRINT("Power:");
+	DYIRDAIKIN_DEBUG_PRINT(powerState,DEC);
+	DYIRDAIKIN_DEBUG_PRINTLN();
+	DYIRDAIKIN_DEBUG_PRINT("Mode:");
+	DYIRDAIKIN_DEBUG_PRINT(mode,DEC);
+	DYIRDAIKIN_DEBUG_PRINTLN();
+	DYIRDAIKIN_DEBUG_PRINT("Fan:");
+	DYIRDAIKIN_DEBUG_PRINT(fan,DEC);
+	DYIRDAIKIN_DEBUG_PRINTLN();
+	DYIRDAIKIN_DEBUG_PRINT("Temperature:");
+	DYIRDAIKIN_DEBUG_PRINT(temperature,DEC);
+	DYIRDAIKIN_DEBUG_PRINTLN();
+	DYIRDAIKIN_DEBUG_PRINT("Swing:");
+	DYIRDAIKIN_DEBUG_PRINT(swing,DEC);
+	DYIRDAIKIN_DEBUG_PRINTLN();
+	//~ DYIRDAIKIN_DEBUG_PRINT("Econo:");
+	//~ DYIRDAIKIN_DEBUG_PRINT(econo,DEC);
+	//~ DYIRDAIKIN_DEBUG_PRINTLN();
+	//~ DYIRDAIKIN_DEBUG_PRINT("Timer On:");
+	//~ DYIRDAIKIN_DEBUG_PRINT(timerOn,DEC);
+	//~ DYIRDAIKIN_DEBUG_PRINTLN();
+	//~ DYIRDAIKIN_DEBUG_PRINT("Timer On Value:");
+	//~ DYIRDAIKIN_DEBUG_PRINT((timerOnValue / 60),DEC);
+	//~ DYIRDAIKIN_DEBUG_PRINT(":");
+	//~ DYIRDAIKIN_DEBUG_PRINT((timerOnValue % 60),DEC);
+	//~ DYIRDAIKIN_DEBUG_PRINTLN();
+	//~ DYIRDAIKIN_DEBUG_PRINT("Timer Off:");
+	//~ DYIRDAIKIN_DEBUG_PRINT(timerOff,DEC);
+	//~ DYIRDAIKIN_DEBUG_PRINTLN();
+	//~ DYIRDAIKIN_DEBUG_PRINT("Timer Off Value:");
+	//~ DYIRDAIKIN_DEBUG_PRINT((timerOffValue / 60),DEC);
+	//~ DYIRDAIKIN_DEBUG_PRINT(":");
+	//~ DYIRDAIKIN_DEBUG_PRINT((timerOffValue % 60),DEC);
+	//~ DYIRDAIKIN_DEBUG_PRINTLN();
+	//~ DYIRDAIKIN_DEBUG_PRINT("Timer Now:");
+	//~ DYIRDAIKIN_DEBUG_PRINT((timeNow / 60),DEC);
+	//~ DYIRDAIKIN_DEBUG_PRINT(":");
+	//~ DYIRDAIKIN_DEBUG_PRINT((timeNow % 60),DEC);
+	//~ DYIRDAIKIN_DEBUG_PRINTLN();
 }
 
 uint8_t DYIRDaikinRecv::isOneMatched(uint16_t lowTimeCounter,uint16_t highTimecounter)
 {
-	if ((lowTimeCounter > 15 && lowTimeCounter < 50) && (highTimecounter > (lowTimeCounter + lowTimeCounter)  && highTimecounter < 200)) {
+	if ((lowTimeCounter > 15 && lowTimeCounter < 56) && (highTimecounter >= (lowTimeCounter + lowTimeCounter)  && highTimecounter < 150)) {
 		return 1;
 	}
 	return 0;
@@ -379,7 +364,7 @@ uint8_t DYIRDaikinRecv::isOneMatched(uint16_t lowTimeCounter,uint16_t highTimeco
 uint8_t DYIRDaikinRecv::isZeroMatched(uint16_t lowTimeCounter,uint16_t highTimecounter)
 {
 
-	if ((lowTimeCounter > 15 && lowTimeCounter < 50) && (highTimecounter > 15 && highTimecounter < 50)) {
+	if ((lowTimeCounter > 20 && lowTimeCounter < 60) && (highTimecounter > 15 && highTimecounter < 40)) {
 		return 1;
 	}
 	return 0;
@@ -387,7 +372,7 @@ uint8_t DYIRDaikinRecv::isZeroMatched(uint16_t lowTimeCounter,uint16_t highTimec
 
 uint8_t DYIRDaikinRecv::isStartMatched(uint16_t lowTimeCounter,uint16_t highTimecounter)
 {
-	if ((lowTimeCounter > 100 && lowTimeCounter < 400) && (highTimecounter > 70  && highTimecounter < 250)) {
+	if ((lowTimeCounter > 50 && lowTimeCounter < 400) && (highTimecounter > 70  && highTimecounter < 250)) {
 		return 1;
 	}
 	return 0;
@@ -395,7 +380,7 @@ uint8_t DYIRDaikinRecv::isStartMatched(uint16_t lowTimeCounter,uint16_t highTime
 
 uint8_t DYIRDaikinRecv::isStopMatched(uint16_t lowTimeCounter,uint16_t highTimecounter)
 {
-	if ((lowTimeCounter > 15 && lowTimeCounter < 50) && (highTimecounter > 200)) {
+	if ((lowTimeCounter > 20 && lowTimeCounter < 500) && (highTimecounter > 200)) {
 		return 1;
 	}
 	return 0;

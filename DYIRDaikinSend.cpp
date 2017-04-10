@@ -161,7 +161,7 @@ void DYIRDaikinSend::enableIROut(int khz) {
 		halfPeriodicTimeLow = 0;
 #else
         halfPeriodicTimeLow = 0;
-#endif;
+#endif
 #else
         halfPeriodicTimeLow = (periodicTime / 4) + (periodicTime % 4);
 #endif
