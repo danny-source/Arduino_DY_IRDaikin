@@ -20,7 +20,7 @@ public:
 	void setSwingLR_on();
 	void setSwingLR_off();
 	void setSwingLR(uint8_t state);
-    void setMode(uint8_t mode);//0 FAN, 1 COOL, 2 DRY, 3 HEAT
+    void setMode(uint8_t mode);//0 FAN, 1 COOL, 2 DRY, 3 HEAT,4 AUTO
     void setFan(uint8_t speed);// 0~4 speed,5 auto,6 moon
     void setTemp(uint8_t temp);//23 ~ 33
     void sendCommand();

@@ -11,6 +11,7 @@ public:
 	uint8_t begin(uint8_t pin,uint8_t *buffer,uint8_t buffer_size);
 	uint8_t decode();
 	uint8_t dumpPackets();
+	void descriptionARC(uint8_t *recvData);
 private:
 	uint8_t 	irPin = 7;
 //
@@ -51,7 +52,6 @@ uint8_t isSignalLowHighPaired();
 uint8_t decodePerPacket();
 uint8_t checkSum(uint8_t *buffer,uint8_t len);
 void fillBitToByte(uint8_t *buffer, uint8_t value, uint8_t *bitPtr, uint8_t *bufferIndex);
-void printARCState(uint8_t *recvData);
 uint8_t isOneMatched(uint16_t lowTimeCounter,uint16_t highTimecounter);
 uint8_t isZeroMatched(uint16_t lowTimeCounter,uint16_t highTimecounter);
 uint8_t isStartMatched(uint16_t lowTimeCounter,uint16_t highTimecounter);

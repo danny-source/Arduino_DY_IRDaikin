@@ -110,7 +110,7 @@ void DYIRDaikin::setMode(uint8_t mode)
 	uint8_t trmode = vModeTable[mode];
 	if (mode>=0 && mode <=4)
 	{
-		daikin[13]=trmode<<4 | getPower();
+		daikin[13] = (trmode << 4) | getPower();
 		checksum();
 	}
 }
@@ -118,11 +118,17 @@ void DYIRDaikin::setMode(uint8_t mode)
 uint8_t DYIRDaikin::getMode()
 {
 	uint8_t mode = (daikin[13] & B01110000) >> 4;
-	if (mode == 0x6) mode = 0;
-	if (mode == 0x3) mode = 1;
-	if (mode == 0x2) mode = 2;
-	if (mode == 0x4) mode = 3;
-	if (mode == 0x0) mode = 4;
+	if (mode == 0x6) {
+		mode = 0;
+	}else if (mode == 0x3) {
+		mode = 1;
+	}else if (mode == 0x2) {
+		mode = 2;
+	}else if (mode == 0x4) {
+		mode = 3;
+	}else if (mode == 0x0) {
+		mode = 4;
+	}
 	return mode;
 }
 
@@ -141,13 +147,21 @@ void DYIRDaikin::setFan(uint8_t speed)
 uint8_t DYIRDaikin::getFan()
 {
 	uint8_t fan = (daikin[16] & 0xf0);
-	if (fan == 0x30) fan = 0;
-	if (fan == 0x40) fan = 1;
-	if (fan == 0x50) fan = 2;
-	if (fan == 0x60) fan = 3;
-	if (fan == 0x70) fan = 4;
-	if (fan == 0xa0) fan = 5;
-	if (fan == 0xb0) fan = 6;
+	if (fan == 0x30) {
+		fan = 0;
+	}else if (fan == 0x40) {
+		fan = 1;
+	}else if (fan == 0x50) {
+		fan = 2;
+	}else if (fan == 0x60) {
+		fan = 3;
+	}else if (fan == 0x70) {
+		fan = 4;
+	}else if (fan == 0xa0) {
+		fan = 5;
+	}else if (fan == 0xb0) {
+		fan = 6;
+	}
 	return fan;
 }
 
@@ -168,11 +182,6 @@ uint8_t DYIRDaikin::getTemp()
 
 void DYIRDaikin::sendCommand()
 {
-	  //~ _irsend.sendDaikinWake();
-      //~ delay(20);
-      //~ _irsend.sendDaikin(daikinHeader, 9,0);
-      //~ delay(29);
-      delay(25);
       checksum();
       _irsend.sendDaikin(daikin, 8,0);
       delay(29);
@@ -190,25 +199,26 @@ void DYIRDaikin::dump()
 
 void DYIRDaikin::description()
 {
-	Serial.print(F("\r\n==send buffer==\r\n"));
-	Serial.print(F("Power:"));
-	Serial.print(getPower(),DEC);
-	Serial.println();
-	Serial.print(F("Mode:"));
-	Serial.print(getMode(),DEC);
-	Serial.println();
-	Serial.print(F("Fan:"));
-	Serial.print(getFan(),DEC);
-	Serial.println();
-	Serial.print(F("Temperature:"));
-	Serial.print(getTemp(),DEC);
-	Serial.println();
-	Serial.print(F("Swing:"));
-	Serial.print(getSwing(),DEC);
-	Serial.println();
-	Serial.print(F("SwingLR:"));
-	Serial.print(getSwingLR(),DEC);
-	Serial.println();
+	//Serial.print(F("\r\n==send buffer==\r\n"));
+	//Serial.print(F("Power:"));
+	//Serial.print(getPower(),DEC);
+	//Serial.println();
+	//Serial.print(F("Mode:"));
+	//Serial.print(getMode(),DEC);
+	//Serial.println();
+	//Serial.print(F("Fan:"));
+	//Serial.print(getFan(),DEC);
+	//Serial.println();
+	//Serial.print(F("Temperature:"));
+	//Serial.print(getTemp(),DEC);
+	//Serial.println();
+	//Serial.print(F("Swing:"));
+	//Serial.print(getSwing(),DEC);
+	//Serial.println();
+	//Serial.print(F("SwingLR:"));
+	//Serial.print(getSwingLR(),DEC);
+	//Serial.println();
+	_irrecv.descriptionARC(daikin + (sizeof(unsigned char)*8));
 }
 
 //private function
@@ -256,6 +266,7 @@ void DYIRDaikin::receivedIRUpdateToSendBuffer(uint8_t *recvData) {
 	if (fan == 0xb0) fan = 6;
 
 	uint8_t swing = (recvData[8] & 0x01);
+	uint8_t swingLR = (recvData[9] & 0x01);
 	uint8_t powerState =  (recvData[5] & 0x01);
 	uint8_t timerOn =  (recvData[5] & 0x02) >> 1;
 	uint16_t timerOnValue = (uint16_t)recvData[10]|(uint16_t)(recvData[11] & B00000111)<<8;
@@ -270,11 +281,18 @@ void DYIRDaikin::receivedIRUpdateToSendBuffer(uint8_t *recvData) {
 		//~ timeNow = (uint16_t)recvData[5]|(uint16_t)(recvData[6] & B00000111)<<8;
 	//~ }
 
-	//~ static byte vModeTable[] = { 0x6,0x3,0x2};
-	if (mode == 0x6) mode = 0;
-	if (mode == 0x3) mode = 1;
-	if (mode == 0x2) mode = 2;
-	if (mode == 0x4) mode = 3;
+	//{ 0x6,0x3,0x2,0x4,0x00};
+	if (mode == 0x6) {
+		mode = 0;
+	}else if (mode == 0x3) {
+		mode = 1;
+	}else if (mode == 0x2) {
+		mode = 2;
+	}else if (mode == 0x4) {
+		mode = 3;
+	}else if (mode == 0x0) {
+		mode = 4;
+	}
 	//
 	uint8_t econo = (recvData[16] & B00000100) >> 2;
 	//set all state
@@ -283,6 +301,7 @@ void DYIRDaikin::receivedIRUpdateToSendBuffer(uint8_t *recvData) {
 	setFan(fan);
 	setTemp(temperature);
 	setSwing(swing);
+	setSwingLR(swingLR);
 
 
 	//~ Serial.print(F("\r\n==receive buffer==\r\n"));
