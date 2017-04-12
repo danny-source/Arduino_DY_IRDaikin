@@ -30,8 +30,8 @@ uint8_t DYIRDaikinRecv::begin(uint8_t pin,uint8_t *buffer,uint8_t buffer_size)
 	}
 	irPin = pin;
 	pinMode(irPin,INPUT);
-	//pinMode(3,OUTPUT);
-	//PORTD |= B00001000;
+	bitMask = B00000001;
+	bitMask = bitMask << (uint8_t)irPin;
 	irReceiveDataP0 = buffer;
 	memset(irReceiveDataP0,0,buffer_size);
 	hasPacket = 0;
@@ -122,8 +122,12 @@ uint8_t DYIRDaikinRecv::decodePerPacket() {
 uint8_t DYIRDaikinRecv::dumpPackets() {
 
   for(;;) {
-	irState = digitalRead(irPin);
-	//irState = (uint8_t)((PIND & B00010000) >> 4);
+	  #if AVR_HARDWARE_PWM
+		irState = (uint8_t)((PIND & bitMask) >> (uint8_t)irPin);
+	  #else
+		irState = digitalRead(irPin);
+		#endif
+
 	if (irState == 1) {
 		return 0;
 	}else {
@@ -143,8 +147,12 @@ uint8_t DYIRDaikinRecv::dumpPackets() {
   //searching ir data
   uint8_t result = 0;
   while (1) {
-	irState = digitalRead(irPin);
-    //irState = (uint8_t)((PIND & B00010000) >> 4);
+	  #if AVR_HARDWARE_PWM
+		irState = (uint8_t)((PIND & bitMask) >> (uint8_t)irPin);
+	  #else
+		irState = digitalRead(irPin);
+		#endif
+    irState = (uint8_t)((PIND & bitMask) >> (uint8_t)irPin);
     if (irState != irLastState) {
 		irSignalState = irLastState;
 		irSignalDuation = duationCounter;

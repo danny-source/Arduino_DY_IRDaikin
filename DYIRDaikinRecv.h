@@ -46,6 +46,7 @@ private:
 	uint8_t		receiveBuffer[26] = {0};
 	uint8_t		receiveBufferBitPtr = 0;
 	uint8_t		receiveBufferIndex = 0;
+	uint8_t		bitMask = B00000001;
 	//
 	#ifdef DYIRDAIKIN_DEBUG_PRINT_SIGNAL_DUATION
 	uint8_t 	irStateDebugBuf[310]= {0};

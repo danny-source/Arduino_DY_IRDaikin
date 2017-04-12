@@ -8,7 +8,7 @@ void setup() {
 	delay(2000);
 	Serial.println();
 	Serial.println("Daikin Recv Packet Start");
-	_irrecv.begin(4,irReceiveData,30);
+	_irrecv.begin(2,irReceiveData,30);
 
 }
 
