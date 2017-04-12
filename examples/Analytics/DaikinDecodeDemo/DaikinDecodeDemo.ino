@@ -10,7 +10,7 @@ void setup()
 	delay(500);
 	Serial.println("DaikinDecodeDemo Start!");
 	irdaikin.begin();
-	irdaikin.decodePin(4);
+	irdaikin.decodePin(PA4);
 }
 
 void loop() {

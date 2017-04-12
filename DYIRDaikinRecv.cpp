@@ -111,8 +111,6 @@ uint8_t DYIRDaikinRecv::decodePerPacket() {
 		}
 		if (isZeroMatched(irStateDurationBuf[0],irStateDurationBuf[1]) == 1) {
 			fillBitToByte(receiveBuffer, 0, &receiveBufferBitPtr, &receiveBufferIndex);
-		}else if (isOneMatched(irStateDurationBuf[0],irStateDurationBuf[1]) == 1){
-			fillBitToByte(receiveBuffer, 1, &receiveBufferBitPtr, &receiveBufferIndex);
 		}else {
 			fillBitToByte(receiveBuffer, 1, &receiveBufferBitPtr, &receiveBufferIndex);
 		}
@@ -145,7 +143,7 @@ uint8_t DYIRDaikinRecv::dumpPackets() {
   //searching ir data
   uint8_t result = 0;
   while (1) {
-    irState = digitalRead(irPin);
+	irState = digitalRead(irPin);
     //irState = (uint8_t)((PIND & B00010000) >> 4);
     if (irState != irLastState) {
 		irSignalState = irLastState;
@@ -173,15 +171,21 @@ uint8_t DYIRDaikinRecv::dumpPackets() {
 			if (result == SIGNAL_PATTERN_START) {
 				signalCounter = 2;
 				bitCounter = -1;
+				#ifdef DYIRDAIKIN_DEBUG_PRINT_SIGNAL_DUATION
+				memset(irStateDebugBuf,0,310);
+				memset(irStateDurationDebugBuf,0,310);
+				#endif
 			}
 			//
-			//if ((signalCounter == 300) && (result == SIGNAL_PATTERN_PACKET)) {
-				//DYIRDAIKIN_DEBUG_PRINT(irStateBuf[0],DEC);
-				//DYIRDAIKIN_DEBUG_PRINT(",");
-				//DYIRDAIKIN_DEBUG_PRINTLN(irStateDurationBuf[0],DEC);
-				//DYIRDAIKIN_DEBUG_PRINT(irStateBuf[1],DEC);
-				//DYIRDAIKIN_DEBUG_PRINT(",");
-				//DYIRDAIKIN_DEBUG_PRINTLN(irStateDurationBuf[1],DEC);
+			//if (result == SIGNAL_PATTERN_PACKET) {
+				#ifdef DYIRDAIKIN_DEBUG_PRINT_SIGNAL_DUATION
+				if (signalCounter < 310) {
+					irStateDebugBuf[signalCounter - 2] = irStateBuf[0];
+					irStateDurationDebugBuf[signalCounter - 2] = irStateDurationBuf[0];
+					irStateDebugBuf[signalCounter - 1] = irStateBuf[1];
+					irStateDurationDebugBuf[signalCounter - 1] = irStateDurationBuf[1];
+				}
+				#endif
 			//}
 		}
 		//clear counterS
@@ -206,35 +210,56 @@ uint8_t DYIRDaikinRecv::dumpPackets() {
 						for (int idx = 0;idx < irReceiveDataLen;idx++) {
 							irReceiveDataP0[idx] = receiveBuffer[idx];
 						}
-						if (checkSum(receiveBuffer,irReceiveDataLen) == 0) {
-							DYIRDAIKIN_DEBUG_PRINTLN("CRC ERR");
-						}
-						//#ifdef DEBUG_IR_PRINT
-							//DYIRDAIKIN_DEBUG_PRINTLN("=Decoded=");
-							//DYIRDAIKIN_DEBUG_PRINT("scount:");
-							//DYIRDAIKIN_DEBUG_PRINTLN(signalCounter,DEC);
-							//DYIRDAIKIN_DEBUG_PRINT("bytes:");
-							//DYIRDAIKIN_DEBUG_PRINTLN(irReceiveDataLen,DEC);
-							//DYIRDAIKIN_DEBUG_PRINT("pcount:");
-							//DYIRDAIKIN_DEBUG_PRINTLN(packetCounter,DEC);
-							//DYIRDAIKIN_DEBUG_PRINTLN("--");
-							//for (int idx = 0;idx < irReceiveDataLen;idx++) {
-								//if (receiveBuffer[idx] < 16) {
-									//DYIRDAIKIN_DEBUG_PRINT("0");
-									//DYIRDAIKIN_DEBUG_PRINT(receiveBuffer[idx],HEX);
-								//}else{
-									//DYIRDAIKIN_DEBUG_PRINT(receiveBuffer[idx],HEX);
-								//}
-								//DYIRDAIKIN_DEBUG_PRINT("-");
-							//}
-							//DYIRDAIKIN_DEBUG_PRINTLN("");
-							//if (checkSum(receiveBuffer,irReceiveDataLen) == 1) {
-								//DYIRDAIKIN_DEBUG_PRINTLN("CRC OK");
-							//}else {
-								//DYIRDAIKIN_DEBUG_PRINTLN("CRC ERR");
-							//}
-							//DYIRDAIKIN_DEBUG_PRINTLN("--");
-						//#endif
+						//if (checkSum(receiveBuffer,irReceiveDataLen) == 0) {
+							//DYIRDAIKIN_DEBUG_PRINTLN("CRC ERR");
+						//}
+						#ifdef DEBUG_IR_PRINT
+							DYIRDAIKIN_DEBUG_PRINTLN("=Decoded=");
+							DYIRDAIKIN_DEBUG_PRINT("scount:");
+							DYIRDAIKIN_DEBUG_PRINTLN(signalCounter,DEC);
+							DYIRDAIKIN_DEBUG_PRINT("bytes:");
+							DYIRDAIKIN_DEBUG_PRINTLN(irReceiveDataLen,DEC);
+							DYIRDAIKIN_DEBUG_PRINT("pcount:");
+							DYIRDAIKIN_DEBUG_PRINTLN(packetCounter,DEC);
+							DYIRDAIKIN_DEBUG_PRINTLN("--");
+							for (int idx = 0;idx < irReceiveDataLen;idx++) {
+								if (receiveBuffer[idx] < 16) {
+									DYIRDAIKIN_DEBUG_PRINT("0");
+									DYIRDAIKIN_DEBUG_PRINT(receiveBuffer[idx],HEX);
+								}else{
+									DYIRDAIKIN_DEBUG_PRINT(receiveBuffer[idx],HEX);
+								}
+								DYIRDAIKIN_DEBUG_PRINT("-");
+							}
+							DYIRDAIKIN_DEBUG_PRINTLN("");
+							if (checkSum(receiveBuffer,irReceiveDataLen) == 1) {
+								DYIRDAIKIN_DEBUG_PRINTLN("CRC OK");
+							}else {
+								DYIRDAIKIN_DEBUG_PRINTLN("CRC ERR");
+							}
+							DYIRDAIKIN_DEBUG_PRINTLN("--");
+						#endif
+							#ifdef DYIRDAIKIN_DEBUG_PRINT_SIGNAL_DUATION
+							for (int idx = 0;idx < 310;idx++) {
+								if (irStateDurationDebugBuf[idx] == 0) {
+									continue;
+								}
+								if (irStateDebugBuf[idx] == 0) {
+									DYIRDAIKIN_DEBUG_PRINT(idx,DEC);
+									DYIRDAIKIN_DEBUG_PRINT("[");
+								}
+								DYIRDAIKIN_DEBUG_PRINT(irStateDebugBuf[idx],DEC);
+								DYIRDAIKIN_DEBUG_PRINT(",");
+								DYIRDAIKIN_DEBUG_PRINT(irStateDurationDebugBuf[idx],DEC);
+								if (irStateDebugBuf[idx] == 0) {
+									DYIRDAIKIN_DEBUG_PRINT("-");
+								}
+								if (irStateDebugBuf[idx] == 1) {
+									DYIRDAIKIN_DEBUG_PRINTLN("]");
+								}
+							}
+							DYIRDAIKIN_DEBUG_PRINT("---");
+							#endif
 						//clear
 						packetCounter = 0;
 						hasWakupPattern = 0;
@@ -438,7 +463,7 @@ void DYIRDaikinRecv::descriptionARC(uint8_t *recvData) {
 
 uint8_t DYIRDaikinRecv::isOneMatched(uint16_t lowTimeCounter,uint16_t highTimecounter)
 {
-	if ((lowTimeCounter > 15 && lowTimeCounter < 56) && ((highTimecounter) >= (lowTimeCounter + lowTimeCounter)  && highTimecounter < 150)) {
+	if ((lowTimeCounter > 15 && lowTimeCounter < 60) && ((highTimecounter) >= (lowTimeCounter + lowTimeCounter)  && highTimecounter < 150)) {
 		return 1;
 	}
 	return 0;

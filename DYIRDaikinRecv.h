@@ -4,6 +4,7 @@
 
 // Only used for testing; can remove virtual for shorter code
 #define VIRTUAL
+//#define DYIRDAIKIN_DEBUG_PRINT_SIGNAL_DUATION
 
 class DYIRDaikinRecv
 {
@@ -15,8 +16,8 @@ public:
 private:
 	uint8_t 	irPin = 7;
 //
-	uint8_t 	irState = 1;
-	uint8_t 	irLastState = 1;
+	volatile uint8_t 	irState = 1;
+	volatile uint8_t 	irLastState = 1;
 	unsigned long	packetTimeoutCounter = 0;
 	unsigned long 	signalTimeoutCounter = 0; //about 120ms
 
@@ -45,6 +46,11 @@ private:
 	uint8_t		receiveBuffer[26] = {0};
 	uint8_t		receiveBufferBitPtr = 0;
 	uint8_t		receiveBufferIndex = 0;
+	//
+	#ifdef DYIRDAIKIN_DEBUG_PRINT_SIGNAL_DUATION
+	uint8_t 	irStateDebugBuf[310]= {0};
+	unsigned long irStateDurationDebugBuf[310] = {0};
+	#endif
 
 //
 uint8_t isSignalLowHighPaired();
@@ -57,5 +63,4 @@ uint8_t isZeroMatched(uint16_t lowTimeCounter,uint16_t highTimecounter);
 uint8_t isStartMatched(uint16_t lowTimeCounter,uint16_t highTimecounter);
 uint8_t isStopMatched(uint16_t lowTimeCounter,uint16_t highTimecounter);
 };
-
 #endif
