@@ -14,7 +14,7 @@ public:
 	uint8_t dumpPackets();
 	void descriptionARC(uint8_t *recvData);
 private:
-	uint8_t 	irPin = 7;
+	volatile uint8_t 	irPin = 7;
 //
 	volatile uint8_t 	irState = 1;
 	volatile uint8_t 	irLastState = 1;
@@ -46,7 +46,7 @@ private:
 	uint8_t		receiveBuffer[26] = {0};
 	uint8_t		receiveBufferBitPtr = 0;
 	uint8_t		receiveBufferIndex = 0;
-	uint8_t		bitMask = B00000001;
+	volatile uint8_t		bitMask = B00000001;
 	//
 	#ifdef DYIRDAIKIN_DEBUG_PRINT_SIGNAL_DUATION
 	uint8_t 	irStateDebugBuf[310]= {0};
