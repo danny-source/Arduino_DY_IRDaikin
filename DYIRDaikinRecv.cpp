@@ -117,6 +117,8 @@ uint8_t DYIRDaikinRecv::decodePerPacket() {
 			irPatternStateMachine = 0;
 			wakePatternCounter = 0;
 			packetCounter++;
+			endTime = millis();
+			startTime = endTime;
 			return SIGNAL_PATTERN_STOP;
 		}
 		if (isZeroMatched(irStateDurationBuf[0],irStateDurationBuf[1]) == 1) {
@@ -133,10 +135,20 @@ uint8_t DYIRDaikinRecv::dumpPackets() {
 
   for(;;) {
 	  irState = readIR(irPin);
-
 	if (irState != irLastState) {
 		if ((irLastState == 1) && (irState == 0)) {
+			startTime = millis();//reset big timeout
+			endTime = startTime;
 			break;
+		}
+	}else {
+		if (packetCounter > 0) {
+			endTime = millis();
+			if ((endTime - startTime) > 80) {
+			  //big timeout need reset packetCounter, sometimes packet is not completed
+			  packetCounter = 0;
+			  DYIRDAIKIN_DEBUG_PRINTLN("restart");
+			}
 		}
 	}
 	irLastState = irState;
@@ -191,6 +203,7 @@ uint8_t DYIRDaikinRecv::dumpPackets() {
 				duationCounter = 0;
 				signalCounter = 0;
 				signalTimeoutCounter = 0;
+				packetCounter = 0;
 				break;
 			}
 			if ((result & SIGNAL_PATTERN_START) == SIGNAL_PATTERN_START) {
@@ -219,6 +232,22 @@ uint8_t DYIRDaikinRecv::dumpPackets() {
 					//last packet and data length need than 8 bytes
 
 					if ((packetCounter == packetLength)) {
+						if (irReceiveDataLen <= 8) {
+							DYIRDAIKIN_DEBUG_PRINTLN("=data length error=");
+							DYIRDAIKIN_DEBUG_PRINT("scount:");
+							DYIRDAIKIN_DEBUG_PRINTLN(signalCounter,DEC);
+							DYIRDAIKIN_DEBUG_PRINT("bytes:");
+							DYIRDAIKIN_DEBUG_PRINTLN(irReceiveDataLen,DEC);
+							DYIRDAIKIN_DEBUG_PRINT("pcount:");
+							DYIRDAIKIN_DEBUG_PRINTLN(packetCounter,DEC);
+							DYIRDAIKIN_DEBUG_PRINT("plength:");
+							DYIRDAIKIN_DEBUG_PRINTLN(packetLength,DEC);
+							DYIRDAIKIN_DEBUG_PRINTLN("--");
+							hasWakupPattern = 0;
+							packetCounter = 0;
+							wakePatternCounter = 0;;
+							break;
+						}
 						for (int idx = 0;idx < irReceiveDataLen;idx++) {
 							irReceiveDataP0[idx] = receiveBuffer[idx];
 						}
