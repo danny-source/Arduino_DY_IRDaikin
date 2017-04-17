@@ -3,7 +3,7 @@
 #define DYIRDaikinDef_h
 
 #define DYIRDAIKIN_DEBUG
-#define DYIRDAIKIN_DEBUG_SERIAL Serial1
+#define DYIRDAIKIN_DEBUG_SERIAL Serial
 
 #ifdef DYIRDAIKIN_DEBUG
   #define DYIRDAIKIN_DEBUG_PRINT(...) { DYIRDAIKIN_DEBUG_SERIAL.print(__VA_ARGS__); }

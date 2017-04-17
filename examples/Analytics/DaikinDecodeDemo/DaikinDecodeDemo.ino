@@ -1,7 +1,7 @@
 
 
 #include <DYIRDaikin.h>
-#define SSERIAL Serial1
+#define SSERIAL Serial
 
 DYIRDaikin irdaikin;
 void setup()
