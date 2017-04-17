@@ -12,18 +12,18 @@ void setup()
   Serial.println("DaikinBridgeDemo Start!");
 	irdaikin.begin();
 	irdaikin.decodePin(4);
-	irdaikin.daikin_on();
-	irdaikin.daikin_setSwing_off();
-	irdaikin.daikin_setMode(1);
-	irdaikin.daikin_setFan(4);//FAN speed to MAX
-	irdaikin.daikin_setTemp(25);
+	irdaikin.on();
+	irdaikin.setSwing_off();
+	irdaikin.setMode(1);
+	irdaikin.setFan(4);//FAN speed to MAX
+	irdaikin.setTemp(25);
 }
 
 void loop() {
 	if (irdaikin.decode() == 1) {
 		irdaikin.description();
 		delay(1000);
-		irdaikin.daikin_sendCommand();
+		irdaikin.sendCommand();
 		Serial.println("send command");
 	}
 }

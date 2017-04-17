@@ -1,27 +1,50 @@
 
 #include <DYIRDaikinRecv.h>
 
-//decode
-#define SAMPLE_DELAY_TIME 10//uS
-#define IDLE_TIMER_COUNT ((1000*13)/SAMPLE_DELAY_TIME)//SAMPLE_DELAY_TIME*100*13
-#define BUFFER_SIZE 310
-#define NORMAL_INPUT_STATE 1
+//SAMPLE_DELAY_TIME US
+#if (defined(__AVR_ATmega328P__) | defined(__AVR_ATmega8__) | defined(__AVR_ATmega8P__) | defined(__AVR_ATmega32U4__))
+#define SAMPLE_DELAY_TIME (6)
+#else
+#define SAMPLE_DELAY_TIME (10)
+#endif
+
+#define IDLE_TIMER_COUNT ((1000*13)/SAMPLE_DELAY_TIME)
+#define BUFFER_SIZE (310)
+#define NORMAL_INPUT_STATE (1)
 //
 #define SIGNAL_TIMEOUT__COUNT (6000/SAMPLE_DELAY_TIME)
 #define PACKET_TIMEOUT__COUNT (40000/SAMPLE_DELAY_TIME)
 
 // 0:none,1:start,2:packet,3:stop,4 packet error,5:wake
-#define SIGNAL_PATTERN_START 		B00000001
-#define SIGNAL_PATTERN_PACKET 		B00000010
-#define SIGNAL_PATTERN_STOP  		B00000100
-#define SIGNAL_PATTERN_WAKEUP 		B00001000
-#define SIGNAL_PATTERN_PACKET_ERROR B00010000
+#define SIGNAL_PATTERN_START 		(B00000001)
+#define SIGNAL_PATTERN_PACKET 		(B00000010)
+#define SIGNAL_PATTERN_STOP  		(B00000100)
+#define SIGNAL_PATTERN_WAKEUP 		(B00001000)
+#define SIGNAL_PATTERN_PACKET_ERROR (B00010000)
 //
-#define SIGNAL_PAIRED	2
+#define SIGNAL_PAIRED	(2)
 
 //
 #define DYIRDAIKIN_DEBUG_STATE
 #define DYIRDAIKIN_DEBUG_PRINT_RAW_BYTES
+//FOR MEASURE LOOP TIME
+//if define,clock wave output at D3
+
+//#define DYIRDAIKIN_MEASURE_LOOP_TIME
+
+#if (defined(__AVR_ATmega328P__) | defined(__AVR_ATmega8__) | defined(__AVR_ATmega8P__))
+#define DYIRDAIKIN_MEASURE_LOOP_TIME_OUTPUT
+#define DYIRDAIKIN_MEASURE_LOOP_TIME_HIGH PORTD = PORTD | B00001000;
+#define DYIRDAIKIN_MEASURE_LOOP_TIME_LOW  PORTD = PORTD & B11110111;
+#elif defined(__AVR_ATmega32U4__)
+#warning "__AVR_ATmega32U4__"
+#define DYIRDAIKIN_MEASURE_LOOP_TIME_OUTPUT
+#define DYIRDAIKIN_MEASURE_LOOP_TIME_HIGH PORTD = PORTD | B00000001;
+#define DYIRDAIKIN_MEASURE_LOOP_TIME_LOW  PORTD = PORTD & B11111110;
+#else
+#error "DYIRDAIKIN_MEASURE_LOOP_TIME NO SUPPORT"
+#endif
+
 
 uint8_t DYIRDaikinRecv::begin(uint8_t pin,uint8_t *buffer,uint8_t buffer_size)
 {
@@ -32,6 +55,9 @@ uint8_t DYIRDaikinRecv::begin(uint8_t pin,uint8_t *buffer,uint8_t buffer_size)
 	pinMode(irPin,INPUT);
 	bitMask = B00000001;
 	bitMask = bitMask << (uint8_t)irPin;
+	#ifdef DYIRDAIKIN_MEASURE_LOOP_TIME
+	pinMode(3,OUTPUT);
+	#endif
 	irReceiveDataP0 = buffer;
 	memset(irReceiveDataP0,0,buffer_size);
 	hasPacket = 0;
@@ -90,9 +116,6 @@ uint8_t DYIRDaikinRecv::decodePerPacket() {
 			}
 		}
 		if (hasWakupPattern == 1) {
-			//#ifdef DYIRDAIKIN_DEBUG_STATE
-			//DYIRDAIKIN_DEBUG_PRINTLN(wakePatternCounter,DEC);
-			//#endif
 			if (isStopMatched(irStateDurationBuf[0],irStateDurationBuf[1]) == 1) {
 				//end of wake pattern
 				return (SIGNAL_PATTERN_STOP | SIGNAL_PATTERN_WAKEUP);
@@ -103,7 +126,6 @@ uint8_t DYIRDaikinRecv::decodePerPacket() {
 			wakePatternCounter = 0;
 			irPatternStateMachine = 1;
 			packetLength = (hasWakupPattern == 1 ? 3: 2);
-			//DYIRDAIKIN_DEBUG_PRINTLN(packetLength,DEC);
 			receiveBufferBitPtr = 0;
 			receiveBufferIndex = 0;
 			memset(receiveBuffer,0,26);
@@ -146,8 +168,9 @@ uint8_t DYIRDaikinRecv::dumpPackets() {
 			endTime = millis();
 			if ((endTime - startTime) > 80) {
 			  //big timeout need reset packetCounter, sometimes packet is not completed
+			  hasWakupPattern = 0;
 			  packetCounter = 0;
-			  DYIRDAIKIN_DEBUG_PRINTLN("restart");
+			  DYIRDAIKIN_DEBUG_PRINTLN("detect packet is timeout,restart");
 			}
 		}
 	}
@@ -160,13 +183,7 @@ uint8_t DYIRDaikinRecv::dumpPackets() {
   //
   signalTimeoutCounter = 0;
   packetTimeoutCounter = 0;
-  //
-  #ifdef DYIRDAIKIN_DEBUG_STATE
-  //DYIRDAIKIN_DEBUG_PRINT("S");
-  //DYIRDAIKIN_DEBUG_PRINT(irState,DEC);
-  //DYIRDAIKIN_DEBUG_PRINTLN(irLastState,DEC);
-  //DYIRDAIKIN_DEBUG_PRINTLN(wakePatternCounter,DEC);
-  #endif
+
   irLastState = irState = 0;
 //parse IR signal
   uint8_t result = B00000000;
@@ -176,6 +193,10 @@ uint8_t DYIRDaikinRecv::dumpPackets() {
 	irStateDebugIdx = 0;
 	#endif
   while (1) {
+	#ifdef DYIRDAIKIN_MEASURE_LOOP_TIME_OUTPUT
+	DYIRDAIKIN_MEASURE_LOOP_TIME_LOW
+	DYIRDAIKIN_MEASURE_LOOP_TIME_HIGH
+	#endif
 	  irState = readIR(irPin);
     if (irState != irLastState) {
 		irSignalState = irLastState;
@@ -189,12 +210,6 @@ uint8_t DYIRDaikinRecv::dumpPackets() {
 				//packet is fail ,restart
 				irPatternStateMachine = 0;
 				DYIRDAIKIN_DEBUG_PRINTLN("packet detect is error,restart");
-				DYIRDAIKIN_DEBUG_PRINT(irStateBuf[0],DEC);
-				DYIRDAIKIN_DEBUG_PRINT(",");
-				DYIRDAIKIN_DEBUG_PRINTLN(irStateDurationBuf[0],DEC);
-				DYIRDAIKIN_DEBUG_PRINT(irStateBuf[1],DEC);
-				DYIRDAIKIN_DEBUG_PRINT(",");
-				DYIRDAIKIN_DEBUG_PRINTLN(irStateDurationBuf[1],DEC);
 				hasWakupPattern = 0;
 				packetCounter = 0;
 				break;
@@ -229,87 +244,74 @@ uint8_t DYIRDaikinRecv::dumpPackets() {
 				if (result & SIGNAL_PATTERN_STOP) {
 					irReceiveDataLen = receiveBufferIndex + 1;
 					uint8_t offsetIndex = 0;
-					//last packet and data length need than 8 bytes
-
-					if ((packetCounter == packetLength)) {
+					for (int idx = 0;idx < irReceiveDataLen;idx++) {
+						irReceiveDataP0[idx] = receiveBuffer[idx];
+					}
+					#ifdef DYIRDAIKIN_DEBUG_PRINT_RAW_BYTES
+						DYIRDAIKIN_DEBUG_PRINTLN("=Decoded=");
+						DYIRDAIKIN_DEBUG_PRINT("scount:");
+						DYIRDAIKIN_DEBUG_PRINTLN(signalCounter,DEC);
+						DYIRDAIKIN_DEBUG_PRINT("bytes:");
+						DYIRDAIKIN_DEBUG_PRINTLN(irReceiveDataLen,DEC);
+						DYIRDAIKIN_DEBUG_PRINT("pcount:");
+						DYIRDAIKIN_DEBUG_PRINTLN(packetCounter,DEC);
+						DYIRDAIKIN_DEBUG_PRINT("plength:");
+						DYIRDAIKIN_DEBUG_PRINTLN(packetLength,DEC);
+						DYIRDAIKIN_DEBUG_PRINTLN("--");
+						for (int idx = 0;idx < irReceiveDataLen;idx++) {
+							if (receiveBuffer[idx] < 16) {
+								DYIRDAIKIN_DEBUG_PRINT("0");
+								DYIRDAIKIN_DEBUG_PRINT(receiveBuffer[idx],HEX);
+							}else{
+								DYIRDAIKIN_DEBUG_PRINT(receiveBuffer[idx],HEX);
+							}
+							DYIRDAIKIN_DEBUG_PRINT("-");
+						}
+						DYIRDAIKIN_DEBUG_PRINTLN("");
+						DYIRDAIKIN_DEBUG_PRINTLN("--");
+					#endif
+					if (checkSum(receiveBuffer,irReceiveDataLen) == 0) {
+						packetCounter = 0;
+						DYIRDAIKIN_DEBUG_PRINTLN("-check sum error-restart");
+						break;
+					}
+					if (packetCounter == packetLength) {
+						//last packet and data length need than 8 bytes
 						if (irReceiveDataLen <= 8) {
 							DYIRDAIKIN_DEBUG_PRINTLN("=data length error=");
-							DYIRDAIKIN_DEBUG_PRINT("scount:");
-							DYIRDAIKIN_DEBUG_PRINTLN(signalCounter,DEC);
-							DYIRDAIKIN_DEBUG_PRINT("bytes:");
-							DYIRDAIKIN_DEBUG_PRINTLN(irReceiveDataLen,DEC);
-							DYIRDAIKIN_DEBUG_PRINT("pcount:");
-							DYIRDAIKIN_DEBUG_PRINTLN(packetCounter,DEC);
-							DYIRDAIKIN_DEBUG_PRINT("plength:");
-							DYIRDAIKIN_DEBUG_PRINTLN(packetLength,DEC);
-							DYIRDAIKIN_DEBUG_PRINTLN("--");
 							hasWakupPattern = 0;
 							packetCounter = 0;
 							wakePatternCounter = 0;;
 							break;
 						}
-						for (int idx = 0;idx < irReceiveDataLen;idx++) {
-							irReceiveDataP0[idx] = receiveBuffer[idx];
-						}
-						#ifdef DYIRDAIKIN_DEBUG_STATE
-						if (checkSum(receiveBuffer,irReceiveDataLen) == 0) {
-							DYIRDAIKIN_DEBUG_PRINTLN("CRC ERR");
-						}else {
-							DYIRDAIKIN_DEBUG_PRINTLN("CRC OK");
-						}
-						#endif
-						#ifdef DYIRDAIKIN_DEBUG_PRINT_RAW_BYTES
-							DYIRDAIKIN_DEBUG_PRINTLN("=Decoded=");
-							DYIRDAIKIN_DEBUG_PRINT("scount:");
-							DYIRDAIKIN_DEBUG_PRINTLN(signalCounter,DEC);
-							DYIRDAIKIN_DEBUG_PRINT("bytes:");
-							DYIRDAIKIN_DEBUG_PRINTLN(irReceiveDataLen,DEC);
-							DYIRDAIKIN_DEBUG_PRINT("pcount:");
-							DYIRDAIKIN_DEBUG_PRINTLN(packetCounter,DEC);
-							DYIRDAIKIN_DEBUG_PRINT("plength:");
-							DYIRDAIKIN_DEBUG_PRINTLN(packetLength,DEC);
-							DYIRDAIKIN_DEBUG_PRINTLN("--");
-							for (int idx = 0;idx < irReceiveDataLen;idx++) {
-								if (receiveBuffer[idx] < 16) {
-									DYIRDAIKIN_DEBUG_PRINT("0");
-									DYIRDAIKIN_DEBUG_PRINT(receiveBuffer[idx],HEX);
-								}else{
-									DYIRDAIKIN_DEBUG_PRINT(receiveBuffer[idx],HEX);
-								}
+						DYIRDAIKIN_DEBUG_PRINTLN("=data packet=");
+						#ifdef DYIRDAIKIN_DEBUG_PRINT_SIGNAL_DUATION
+						for (int idx = 0;idx < 310;idx++) {
+							if (irStateDurationDebugBuf[idx] == 0) {
+								continue;
+							}
+							if (irStateDebugBuf[idx] == 0) {
+								DYIRDAIKIN_DEBUG_PRINT(idx,DEC);
+								DYIRDAIKIN_DEBUG_PRINT("[");
+							}
+							DYIRDAIKIN_DEBUG_PRINT(irStateDebugBuf[idx],DEC);
+							DYIRDAIKIN_DEBUG_PRINT(",");
+							DYIRDAIKIN_DEBUG_PRINT(irStateDurationDebugBuf[idx],DEC);
+							if (irStateDebugBuf[idx] == 0) {
 								DYIRDAIKIN_DEBUG_PRINT("-");
 							}
-							DYIRDAIKIN_DEBUG_PRINTLN("");
-							if (checkSum(receiveBuffer,irReceiveDataLen) == 1) {
-								DYIRDAIKIN_DEBUG_PRINTLN("CRC OK");
-							}else {
-								DYIRDAIKIN_DEBUG_PRINTLN("CRC ERR");
+							if (irStateDebugBuf[idx] == 1) {
+								DYIRDAIKIN_DEBUG_PRINTLN("]");
 							}
-							DYIRDAIKIN_DEBUG_PRINTLN("--");
+						}
+						DYIRDAIKIN_DEBUG_PRINT("---");
 						#endif
-							#ifdef DYIRDAIKIN_DEBUG_PRINT_SIGNAL_DUATION
-							for (int idx = 0;idx < 310;idx++) {
-								if (irStateDurationDebugBuf[idx] == 0) {
-									continue;
-								}
-								if (irStateDebugBuf[idx] == 0) {
-									DYIRDAIKIN_DEBUG_PRINT(idx,DEC);
-									DYIRDAIKIN_DEBUG_PRINT("[");
-								}
-								DYIRDAIKIN_DEBUG_PRINT(irStateDebugBuf[idx],DEC);
-								DYIRDAIKIN_DEBUG_PRINT(",");
-								DYIRDAIKIN_DEBUG_PRINT(irStateDurationDebugBuf[idx],DEC);
-								if (irStateDebugBuf[idx] == 0) {
-									DYIRDAIKIN_DEBUG_PRINT("-");
-								}
-								if (irStateDebugBuf[idx] == 1) {
-									DYIRDAIKIN_DEBUG_PRINTLN("]");
-								}
-							}
-							DYIRDAIKIN_DEBUG_PRINT("---");
-							#endif
 						//clear
 						hasWakupPattern = 0;
 						packetCounter = 0;
+						#ifdef DYIRDAIKIN_MEASURE_LOOP_TIME_OUTPUT
+						DYIRDAIKIN_MEASURE_LOOP_TIME_LOW
+						#endif
 						return irReceiveDataLen;
 					}
 					DYIRDAIKIN_DEBUG_PRINTLN("=PSP=");
@@ -318,7 +320,7 @@ uint8_t DYIRDaikinRecv::dumpPackets() {
 						DYIRDAIKIN_DEBUG_PRINTLN("=WAKEUP+STOP=1=");
 						break;
 				}else {
-					DYIRDAIKIN_DEBUG_PRINTLN("=Timeout=2=");
+					DYIRDAIKIN_DEBUG_PRINTLN("=Timeout=2=restart");
 					hasWakupPattern = 0;
 					packetCounter = 0;
 					break;
@@ -330,7 +332,7 @@ uint8_t DYIRDaikinRecv::dumpPackets() {
 				break;
 			}else {
 			#ifdef DYIRDAIKIN_DEBUG_STATE
-				DYIRDAIKIN_DEBUG_PRINTLN("=Timeout=1=");
+				DYIRDAIKIN_DEBUG_PRINTLN("=Timeout=1=restart");
 			#endif
 				hasWakupPattern = 0;
 				break;
@@ -339,20 +341,12 @@ uint8_t DYIRDaikinRecv::dumpPackets() {
 			signalCounter = 0;
 		}
 		signalTimeoutCounter = 0;
-		//sometimes overfollow
-		//bitMask = B00000001;
-		//bitMask = bitMask << (uint8_t)irPin;
 		receiveBufferIndex = 0;
 		break;//###//
 	}//signal timeout
 	if (packetTimeoutCounter > PACKET_TIMEOUT__COUNT) {
 		#ifdef DYIRDAIKIN_DEBUG_STATE
-			DYIRDAIKIN_DEBUG_PRINTLN("=Packet=Timeout=0=");
-			DYIRDAIKIN_DEBUG_PRINT(packetTimeoutCounter,DEC);
-			DYIRDAIKIN_DEBUG_PRINT(",");
-			DYIRDAIKIN_DEBUG_PRINT(irLastState,DEC);
-			DYIRDAIKIN_DEBUG_PRINT("--");
-			DYIRDAIKIN_DEBUG_PRINTLN(irState,DEC);
+			DYIRDAIKIN_DEBUG_PRINTLN("=Detect Packet=Timeout=restart");
 		#endif
 		hasWakupPattern = 0;
 		packetCounter = 0;
@@ -360,6 +354,9 @@ uint8_t DYIRDaikinRecv::dumpPackets() {
 		bitMask = B00000001;
 		bitMask = bitMask << (uint8_t)irPin;
 		receiveBufferIndex = 0;
+		#ifdef DYIRDAIKIN_MEASURE_LOOP_TIME_OUTPUT
+		DYIRDAIKIN_MEASURE_LOOP_TIME_LOW
+		#endif
 		return 0;
 	}
 
@@ -369,8 +366,11 @@ uint8_t DYIRDaikinRecv::dumpPackets() {
 	packetTimeoutCounter++;
     duationCounter++;
   //------------------------------------------------------
-
+	#ifdef DYIRDAIKIN_MEASURE_LOOP_TIME_OUTPUT
+	DYIRDAIKIN_MEASURE_LOOP_TIME_LOW
+	#endif
   }//while
+
     return 0;
 }
 
@@ -394,10 +394,11 @@ uint8_t DYIRDaikinRecv::checkSum(uint8_t *buffer,uint8_t len)
 	}else {
 		DYIRDAIKIN_DEBUG_PRINT(buffer[len - 1],HEX);
 	}
-	DYIRDAIKIN_DEBUG_PRINTLN();
 	if (buffer[len - 1] == sum) {
+		DYIRDAIKIN_DEBUG_PRINTLN(" CRC OK");
 		return 1;
 	}
+	DYIRDAIKIN_DEBUG_PRINTLN(" CRC ERR");
 	return 0;
 }
 

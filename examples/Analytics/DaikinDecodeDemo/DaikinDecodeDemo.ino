@@ -1,16 +1,16 @@
 
 
 #include <DYIRDaikin.h>
-
+#define SSERIAL Serial1
 
 DYIRDaikin irdaikin;
 void setup()
 {
-	Serial.begin(115200);
+	SSERIAL.begin(115200);
 	delay(500);
-	Serial.println("DaikinDecodeDemo Start!");
+	SSERIAL.println("DaikinDecodeDemo Start!");
 	irdaikin.begin();
-	irdaikin.decodePin(PA4);
+	irdaikin.decodePin(2);
 }
 
 void loop() {
