@@ -32,7 +32,7 @@
 //FOR MEASURE LOOP TIME
 //if define,clock wave output at D3
 
-#define DYIRDAIKIN_MEASURE_LOOP_TIME
+//#define DYIRDAIKIN_MEASURE_LOOP_TIME
 
 #ifdef DYIRDAIKIN_MEASURE_LOOP_TIME
 #if (defined(__AVR_ATmega328P__) | defined(__AVR_ATmega8__) | defined(__AVR_ATmega8P__))
@@ -54,7 +54,9 @@
 #define DYIRDAIKIN_MEASURE_LOOP_TIME_HIGH digitalWrite(3,HIGH);
 #define DYIRDAIKIN_MEASURE_LOOP_TIME_LOW  digitalWrite(3,LOW);
 #else
-#error "DYIRDAIKIN_MEASURE_LOOP_TIME NO SUPPORT"
+#define DYIRDAIKIN_MEASURE_LOOP_TIME_OUTPUT
+#define DYIRDAIKIN_MEASURE_LOOP_TIME_HIGH digitalWrite(3,HIGH);
+#define DYIRDAIKIN_MEASURE_LOOP_TIME_LOW  digitalWrite(3,LOW);
 #endif
 #endif
 

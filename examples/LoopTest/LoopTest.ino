@@ -1,6 +1,7 @@
 
 #include <DYIRDaikin.h>
 
+//#define DYIRDAIKIN_SOFT_IR_1
 
 DYIRDaikin irdaikin;
 int isOn;
@@ -8,7 +9,11 @@ int isOn;
 void setup()
 {
 	Serial.begin(115200);
-	irdaikin.begin(4);
+	#ifdef DYIRDAIKIN_SOFT_IR_1
+	irdaikin.begin(PA3);
+	#else
+	irdaikin.begin();
+	#endif
 	irdaikin.on();
 	irdaikin.setSwing_off();
 	irdaikin.setMode(1);
@@ -20,20 +25,7 @@ void setup()
 }
 
 void loop() {
-	while (Serial.available() > 0) {
-
-		if (Serial.read() == '\n') {
-			if (isOn == 0){
-				isOn = 1;
-				irdaikin.off();
-				Serial.println("Turn Off");
-			}else{
-				isOn = 0;
-				irdaikin.on();
-				Serial.println("Turn On");
-			}
-			irdaikin.sendCommand();
-			Serial.println("Execute Command!");
-		}
-	}
+	irdaikin.sendCommand();
+	Serial.println("Execute Command!");
+	delay(5000);
 }

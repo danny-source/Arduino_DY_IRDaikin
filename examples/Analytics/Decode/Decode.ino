@@ -8,7 +8,7 @@ void setup()
 {
 	SSERIAL.begin(115200);
 	delay(500);
-	SSERIAL.println("DaikinDecodeDemo Start!");
+	SSERIAL.println("Decode Demo Start!");
 	irdaikin.begin();
 	irdaikin.decodePin(2);
 }

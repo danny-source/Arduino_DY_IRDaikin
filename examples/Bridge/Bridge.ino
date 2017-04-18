@@ -1,7 +1,7 @@
 
 #include <DYIRDaikin.h>
 
-
+#define DYIRDAIKIN_SOFT_IR
 DYIRDaikin irdaikin;
 int isOn;
 
@@ -9,8 +9,12 @@ void setup()
 {
   Serial.begin(115200);
   delay(500);
-  Serial.println("DaikinBridgeDemo Start!");
+  Serial.println("Daikin Bridge Start!");
+	#ifdef DYIRDAIKIN_SOFT_IR
+	irdaikin.begin(3);
+	#else
 	irdaikin.begin();
+	#endif
 	irdaikin.decodePin(4);
 	irdaikin.on();
 	irdaikin.setSwing_off();

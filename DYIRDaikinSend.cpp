@@ -4,9 +4,6 @@
 void DYIRDaikinSend::begin()
 {
     IRpin = -1;
-#if ((AVR_HARDWARE_PWM) || defined(DY_IRDAIKIN_SOFTIR))
-    IRpin = SOFTIR_PIN;
-#endif
     enableIROut(DYIRDAIKIN_FREQUENCY);
 }
 
@@ -138,6 +135,7 @@ void DYIRDaikinSend::enableIROut(int khz) {
     if (IRpin == -1) {
         pinMode(TIMER_PWM_PIN, OUTPUT);
         TIMER_CONFIG_KHZ(khz);
+
     } else {
         int halfPeriodicTime = (500/khz); // T = 1/f but we need T/2 in microsecond and f is in kHz
         int periodicTime = (1000/khz);
@@ -170,30 +168,19 @@ void DYIRDaikinSend::enableIROut(int khz) {
 
 void DYIRDaikinSend::delayMicrosecondsEnhance(uint32_t usec)
 {
-	if (usec <=0) {
-		return;
-	}
 #if AVR_HARDWARE_PWM
-    while (usec--) {
-        _delay_us(1);
-
-    }
+	if (usec > 4) {
+		unsigned long tStart = micros();
+		unsigned long tEnd = tStart + usec - 4;
 #else
-    if (usec > 100)
-    {
-        uint32_t tStart,tNow;
-
-        tStart = micros();
-        do
-        {
-            tNow=micros();
-        } while (tNow >= tStart && tNow < (tStart + usec - 1));
-    }
-    else
-    {
-        if (usec > 1)
-            delayMicroseconds(usec-1);
-    }
+	if (usec > 2) {
+		unsigned long tStart = micros();
+		unsigned long tEnd = tStart + usec - 2;
 #endif
+		if (tEnd < tStart) { // Check if overflow
+		while ( micros() > tStart ) {} // wait until overflow
+		}
+		while ( micros() < tEnd ) {} // normal wait
+	}
 }
 

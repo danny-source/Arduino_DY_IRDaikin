@@ -1,6 +1,7 @@
 
 #include <DYIRDaikinSend.h>
 
+//#define DYIRDAIKIN_SOFT_IR
 
 DYIRDaikinSend daikinSend;
 int isOn;
@@ -8,7 +9,11 @@ int isOn;
 void setup()
 {
 	Serial.begin(115200);
-	daikinSend.begin(2);
+	#ifdef DYIRDAIKIN_SOFT_IR
+	daikinSend.begin(3);
+	#else
+	daikinSend.begin();
+	#endif
 	delay(1000);
 	Serial.println();
 	Serial.println("Start");
