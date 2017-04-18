@@ -7,13 +7,13 @@ void DYIRDaikinSend::begin()
 #if ((AVR_HARDWARE_PWM) || defined(DY_IRDAIKIN_SOFTIR))
     IRpin = SOFTIR_PIN;
 #endif
-    enableIROut(DY_IRDAIKIN_FREQUENCY);
+    enableIROut(DYIRDAIKIN_FREQUENCY);
 }
 
 void DYIRDaikinSend::begin(int IRsendPin)
 {
     IRpin = IRsendPin;
-    enableIROut(DY_IRDAIKIN_FREQUENCY);
+    enableIROut(DYIRDAIKIN_FREQUENCY);
     pinMode(IRpin, OUTPUT);
     digitalWrite(IRpin, LOW); // When not sending PWM, we want it low
 }
@@ -22,48 +22,48 @@ void DYIRDaikinSend::begin(int IRsendPin)
 void DYIRDaikinSend::sendDaikin(unsigned char buf[], int len, int start) {
     int data2;
 	sendIRWarm();
-    enableIROut(DY_IRDAIKIN_FREQUENCY);
-    mark(DAIKIN_HDR_MARK);
-    space(DAIKIN_HDR_SPACE);
+    enableIROut(DYIRDAIKIN_FREQUENCY);
+    mark(DYIRDAIKIN_HDR_MARK);
+    space(DYIRDAIKIN_HDR_SPACE);
 
     for (int i = start; i < start+len; i++) {
         data2=buf[i];
 
         for (int j = 0; j < 8; j++) {
             if ((1 << j & data2)) {
-                mark(DAIKIN_ONE_MARK);
-                space(DAIKIN_ONE_SPACE);
+                mark(DYIRDAIKIN_ONE_MARK);
+                space(DYIRDAIKIN_ONE_SPACE);
             }
             else {
-                mark(DAIKIN_ZERO_MARK);
-                space(DAIKIN_ZERO_SPACE);
+                mark(DYIRDAIKIN_ZERO_MARK);
+                space(DYIRDAIKIN_ZERO_SPACE);
 
             }
         }
 
     }
-    mark(DAIKIN_ONE_MARK);
-    space(DAIKIN_ZERO_SPACE);
+    mark(DYIRDAIKIN_ONE_MARK);
+    space(DYIRDAIKIN_ZERO_SPACE);
 }
 
 void DYIRDaikinSend::sendDaikinWake() {
     enableIROut(38);
-    space(DAIKIN_ZERO_MARK);
+    space(DYIRDAIKIN_ZERO_MARK);
     //
-    mark(DAIKIN_ZERO_MARK);
-    space(DAIKIN_ZERO_MARK);
+    mark(DYIRDAIKIN_ZERO_MARK);
+    space(DYIRDAIKIN_ZERO_MARK);
     //
-    mark(DAIKIN_ZERO_MARK);
-    space(DAIKIN_ZERO_MARK);
+    mark(DYIRDAIKIN_ZERO_MARK);
+    space(DYIRDAIKIN_ZERO_MARK);
     //
-    mark(DAIKIN_ZERO_MARK);
-    space(DAIKIN_ZERO_MARK);
+    mark(DYIRDAIKIN_ZERO_MARK);
+    space(DYIRDAIKIN_ZERO_MARK);
     //
-    mark(DAIKIN_ZERO_MARK);
-    space(DAIKIN_ZERO_MARK);
+    mark(DYIRDAIKIN_ZERO_MARK);
+    space(DYIRDAIKIN_ZERO_MARK);
     //
-    mark(DAIKIN_ZERO_MARK);
-    space(DAIKIN_ZERO_MARK);
+    mark(DYIRDAIKIN_ZERO_MARK);
+    space(DYIRDAIKIN_ZERO_MARK);
 }
 
 void DYIRDaikinSend::sendIRWarm() {

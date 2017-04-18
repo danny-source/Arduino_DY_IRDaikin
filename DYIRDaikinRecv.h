@@ -2,16 +2,9 @@
 #define DYIRDaikinRecv_h
 #include "DYIRDaikinDef.h"
 
-// Only used for testing; can remove virtual for shorter code
-#define VIRTUAL
 //#define DYIRDAIKIN_DEBUG_PRINT_SIGNAL_DUATION
 
-//#if (defined(__AVR_ATmega328P__) | defined(__AVR_ATmega8__) | defined(__AVR_ATmega8P__))
-//#warning "Use PIND read"
-//#define readIR(p)	((PIND & bitMask) ? 1:0);
-//#else
 #define readIR(p)	digitalRead(p);
-//#endif
 
 class DYIRDaikinRecv
 {

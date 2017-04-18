@@ -32,7 +32,7 @@
 //FOR MEASURE LOOP TIME
 //if define,clock wave output at D3
 
-//#define DYIRDAIKIN_MEASURE_LOOP_TIME
+#define DYIRDAIKIN_MEASURE_LOOP_TIME
 
 #ifdef DYIRDAIKIN_MEASURE_LOOP_TIME
 #if (defined(__AVR_ATmega328P__) | defined(__AVR_ATmega8__) | defined(__AVR_ATmega8P__))
@@ -49,6 +49,10 @@
 #define DYIRDAIKIN_MEASURE_LOOP_TIME_OUTPUT
 #define DYIRDAIKIN_MEASURE_LOOP_TIME_HIGH PORTE = PORTE | B00100000;
 #define DYIRDAIKIN_MEASURE_LOOP_TIME_LOW  PORTE = PORTE & B11011111;
+#elif defined(ARDUINO_AMEBA)
+#define DYIRDAIKIN_MEASURE_LOOP_TIME_OUTPUT
+#define DYIRDAIKIN_MEASURE_LOOP_TIME_HIGH digitalWrite(3,HIGH);
+#define DYIRDAIKIN_MEASURE_LOOP_TIME_LOW  digitalWrite(3,LOW);
 #else
 #error "DYIRDAIKIN_MEASURE_LOOP_TIME NO SUPPORT"
 #endif
@@ -64,7 +68,7 @@ uint8_t DYIRDaikinRecv::begin(uint8_t pin,uint8_t *buffer,uint8_t buffer_size)
 	pinMode(irPin,INPUT);
 	bitMask = B00000001;
 	bitMask = bitMask << (uint8_t)irPin;
-	#ifdef DYIRDAIKIN_MEASURE_LOOP_TIME
+	#ifdef DYIRDAIKIN_MEASURE_LOOP_TIME_OUTPUT
 	pinMode(3,OUTPUT);
 	#endif
 	irReceiveDataP0 = buffer;
