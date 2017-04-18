@@ -95,9 +95,6 @@ void DYIRDaikinSend::mark(int time) {
         //Serial.println();
         //Serial.print("SOFT:");
         //Serial.println(halfPeriodicTime);
-#if (defined(__STM32F1__) || defined(STM32F3) || defined(STM32F4) || AVR_HARDWARE_PWM)
-        noInterrupts();
-#endif
         unsigned long beginTime = micros();
         unsigned long endTime = (unsigned long)time;
         unsigned long nowTime = micros();
@@ -110,9 +107,6 @@ void DYIRDaikinSend::mark(int time) {
             delayMicrosecondsEnhance(halfPeriodicTimeLow);
             nowTime = micros();
         }
-#if (defined(__STM32F1__) || defined(STM32F3) || defined(STM32F4) || AVR_HARDWARE_PWM)
-        interrupts();
-#endif
     }
 }
 
