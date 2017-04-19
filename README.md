@@ -23,7 +23,9 @@
 
 ## Changelog:
 
-1.1.1 fix soft ir frequency and wave width problem
+1.1.2  fix PWM frequency and refactory DYIRDaikinRecv class
+
+1.1.1  fix soft ir frequency and wave width problem
 
 1.1.0  change class and function name,support STM32Duino/Arduino ESP8266/Ameba and  Arduino PWM IR Signal,Arduino UNO/Nano/mega 2560 support SOFT IR
 
@@ -54,6 +56,7 @@
 Default is pin 3 when you use `begin()`.Remeber! SOFT IR must assign pin by `begin(int irSendPin)`
 
 ### ESP8266
+
   - pin 4:GPIO4
   - pin 5:GPIO5
 
@@ -71,7 +74,7 @@ Default is pin 3 when you use `begin()`.Remeber! SOFT IR must assign pin by `beg
   - pin 2:D2
   - pin 5:D5
 
-### STM32F1/F3/F4
+### STM32F1
 
   - pin 2:PA2
   - pin 3:PA3
@@ -104,7 +107,7 @@ Default is pin 3 when you use `begin()`.Remeber! SOFT IR must assign pin by `beg
 - sendCommand();
 
   You must initial setting by your programming and,
-  After Setting execute daikin_sendCommand()
+  After Setting execute sendCommand()
 
 ## Example Daikin ARC:
 
