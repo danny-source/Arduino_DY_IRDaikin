@@ -222,7 +222,7 @@ void DYIRDaikin::description()
 }
 
 //private function
-uint8_t DYIRDaikin::checksum()
+void DYIRDaikin::checksum()
 {
 	uint8_t sum = 0;
 	uint8_t i;
