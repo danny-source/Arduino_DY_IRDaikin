@@ -56,7 +56,7 @@ private:
     byte vModeTable[5] = { 0x6,0x3,0x2,0x4,0x00};
 //
     uint8_t	irReceiveData[25] = {0};
-    uint8_t checksum();
+    void checksum();
 //
     void receivedIRUpdateToSendBuffer(uint8_t *recvData);
 };
