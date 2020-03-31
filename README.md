@@ -129,5 +129,5 @@ Default is pin 3 when you use `begin()`.Remeber! SOFT IR must assign pin by `beg
 
 ## Donate
 
-[[Donate with PayPal](https://raw.githubusercontent.com/stefan-niedermann/paypal-donate-button/master/paypal-donate-button.png)]
+![Donate with PayPal(https://raw.githubusercontent.com/stefan-niedermann/paypal-donate-button/master/paypal-donate-button.png)]
 (https://www.paypal.me/dannytwdanny)
