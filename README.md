@@ -126,3 +126,11 @@ Default is pin 3 when you use `begin()`.Remeber! SOFT IR must assign pin by `beg
 ## Thanks
 
 `Kwok Fai Fong` help me build Daikin BRC remote control support.
+
+## Donate
+
+[
+  ![Donate with PayPal]
+  (https://raw.githubusercontent.com/stefan-niedermann/paypal-donate-button/master/paypal-donate-button.png)
+]
+(https://www.paypal.me/dannytwdanny)
