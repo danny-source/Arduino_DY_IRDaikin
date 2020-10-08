@@ -33,9 +33,9 @@ private:
 //16  17    18  19   20    21
 
     byte vFanTableBRC[3] = { 0x00,0x20};
-//0 FAN 1 COOL 2 DRY
-    byte vModeTableBRC12[4] = { 0x60,0x20,0x70};
-    byte vModeTableBRC14[4] = { 0x00,0x70,0x20};
+//0 FAN 1 COOL 2 DRY 3 WARM (Xian Li)
+    byte vModeTableBRC12[4] = { 0x60,0x20,0x70,0x70};
+    byte vModeTableBRC14[4] = { 0x00,0x70,0x20,0x10};
 //22,23,24,25,26,27,28,29,30,31,32,33,34,35,36
     byte vTempTableBRC[16] = {26,28,30,32,34,36,38,40,
                               42,44,46,48,50,52,54                             };
