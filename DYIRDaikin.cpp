@@ -167,10 +167,25 @@ uint8_t DYIRDaikin::getFan()
 
 void DYIRDaikin::setTemp(uint8_t temp)
 {
-	if (temp >= 18 && temp<=32)
-	{
-		daikin[14] = (temp)*2;
-		checksum();
+	switch (getMode()) {
+		case 1:	// cool
+			if (temp >= 18 && temp <= 32) {
+				daikin[14] = temp * 2;
+				checksum();
+			}
+			break;
+		case 3:	// heat
+			if (temp >= 10 && temp <= 30) {
+				daikin[14] = temp * 2;
+				checksum();
+			}
+			break;
+		case 4:	// auto
+			if (temp >= 18 && temp <= 30) {
+				daikin[14] = temp * 2;
+				checksum();
+			}
+			break;
 	}
 }
 

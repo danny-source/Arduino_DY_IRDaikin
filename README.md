@@ -87,7 +87,7 @@ Default is pin 3 when you use `begin()`.Remeber! SOFT IR must assign pin by `beg
 - setSwing_off();//turn off swing
 - setMode(int mode);//0=FAN, 1=COOL, 2=DRY, 3=HEAT(if you have one)
 - setFan(int speed);// 0~4=speed(1,2,3,4,5),5=auto,6=moon
-- setTemp(int temp);//18 ~ 32 Celsius,if you using Fahrenheit ,maybe to enter Fahrenheit.
+- setTemp(int temp);// 18-32 cool, 10-30 heat, 18-30 auto
 - sendCommand();
 - decode();//decode ir
 - description();//print switch state
@@ -99,7 +99,7 @@ Default is pin 3 when you use `begin()`.Remeber! SOFT IR must assign pin by `beg
 - setSwing_on();//turn on swing
 - setSwing_off();//turn off swing
 - setFan(int speed);// 0.Low 1.High
-- setTemp(int temp);//18 ~ 36 Celsius,if you using Fahrenheit ,maybe to enter Fahrenheit.
+- setTemp(int temp);//18 ~ 36 Celsius
 - sendCommand();
 
  ## Execute function:
@@ -130,4 +130,3 @@ Default is pin 3 when you use `begin()`.Remeber! SOFT IR must assign pin by `beg
 ## Donate
 
 [![Donate with PayPal](https://raw.githubusercontent.com/stefan-niedermann/paypal-donate-button/master/paypal-donate-button.png)](https://www.paypal.me/dannytwdanny)
-
