@@ -108,7 +108,7 @@ uint8_t DYIRDaikinBRC::checksum()
 
     daikinBRC[21] = sum &0xFF;
 
-
+    return sum;
 }
 
 void DYIRDaikinBRC::dump()
