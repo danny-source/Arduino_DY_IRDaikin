@@ -177,7 +177,7 @@ setFan(4);            // Set fan speed to maximum
 setTemp(25);          // Set temperature to 25°C
 description();        // Print the current configuration
 sendCommand();        // Send the IR command
-
+```
 
 ## Acknowledgments
 
